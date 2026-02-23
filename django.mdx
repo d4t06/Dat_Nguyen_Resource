@@ -1,0 +1,336 @@
+---
+title: "Django"
+date: "5-1-2026"
+tags: ["Django"]
+image: "/images/notes/py_django.png"
+---
+
+## Basic
+
+```bash
+myproject/            <-- [Root Directory]
+├── manage.py         <-- Project management tool
+├── myproject/        <-- [Project Configuration Folder]
+│   ├── __init__.py
+│   ├── settings.py   <-- Database, installed apps, static files config
+│   ├── urls.py       <-- Master URL routing
+│   ├── asgi.py       <-- Entry point for async web servers
+│   └── wsgi.py       <-- Entry point for standard web servers
+│
+├── notes/            <-- [App Folder]
+│   ├── migrations/   <-- Database history
+│   ├── admin.py      <-- Admin panel configuration
+│   ├── apps.py       <-- App-specific configuration
+│   ├── models.py     <-- Database schema definitions
+│   ├── tests.py      <-- Automated tests
+│   ├── urls.py       <-- App-specific URL routing (created manually)
+│   └── views.py      <-- Logic for processing requests
+│
+├── static/           <-- CSS, JS, Images, and your .md notes
+├── templates/        <-- HTML files
+└── db.sqlite3        <-- Default database (created after migrations)
+```
+
+**Config for MySQL**
+
+```
+sudo dnf install python3-devel mysql-devel gcc
+python -m pip install mysqlclient
+```
+
+**Create model and run migrate**
+
+```py
+# myapp/models.py
+
+class Post(models.Model):
+    title = models.CharField(max_length=200)
+    body = models.Text("date published")
+```
+
+**Assign myapp to mysite**
+
+```py
+# myapp/urls.py
+
+app_name = "myapp"
+
+urlpatterns = [
+    path('', views.index),
+    path("<str:note_slug>/", views.note_detail, name="note_detail"),
+    path('admin/', admin.site.urls),
+    path("myapp/", include("myapp.urls")),
+]
+```
+
+```py
+# mysite/settings.py
+
+INSTALLED_APPS = [
+    "django.contrib.admin",
+    'myapp',
+    ...
+]
+```
+
+Create new my app migration file
+
+```
+python manage.py makemigrations myapp
+```
+
+Get their sql (optional)
+
+```
+python manage.py sqlmigrate myapp 0001
+```
+
+Migrate table in database
+
+```
+python manage.py migrate
+```
+
+**Create simple homepage**
+
+```html
+// templates/layout.html
+
+<!doctype html>
+{% load static %}
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Document</title>
+        {% block extra_css %} {% endblock %}
+    </head>
+    <body>
+        <h1>This is header</h1>
+
+        {% block content %}
+        {% endblock %}
+
+        <h1>This is footer</h1>
+    </body>
+</html>
+```
+
+```html
+// templates/index.html
+
+{% extends 'layout.html' %}
+{% block extra_css %}
+    <link
+        rel="stylesheet"
+        type="text/css"
+        href="{% static 'css/one-dark.css' %}"
+    />
+{% endblock %}
+
+
+{% block content %}
+    <h1>This is index.html</h1>
+{% endblock %}
+
+```
+
+```py
+# mysite/settings.py
+
+TEMPLATES = [
+    {
+        'DIRS': ['templates'],
+        ...
+    },
+]
+
+```
+
+```py
+# mysite/views.py
+
+def index (req):
+    return render(req, "index.html")
+
+```
+
+```py
+# mysite/urls.py
+
+urlpatterns = [
+    path('', views.index, name="lobby"),
+    ...
+]
+
+```
+
+**Run django**
+
+```
+python manage.py runserver
+```~/Documents/learn_django/mysite
+
+**Set up SCSS**
+
+```
+
+## Filters
+
+```html
+<p class="">{{note.date |date:"M d Y"}}</p>
+
+<img
+    class="{{class |default:'w-full h-full object-cover'}}"
+    src="{% static '' %}{{url}}"
+/>
+```
+
+## Tailwind CSS
+
+```js
+"devDependencies": {
+    "@tailwindcss/typography": "^0.5.19",
+    "browser-sync": "^3.0.4",
+    "concurrently": "^9.2.1",
+    "tailwindcss": "^3.4.19"
+}
+```
+
+```js
+// bs-config.js
+module.exports = {
+    proxy: "127.0.0.1:8000", // The address of your Django dev server
+    files: [
+        "static/css/*.css",
+        "static/js/*.js",
+        "static/notes/*.md",
+        "templates/**/*.html",
+        "app/**/templates/**/*.html",
+    ],
+    open: false, // Prevents the browser from opening automatically
+    reloadDelay: 300, // Wait tailwind complie css
+};
+
+```
+
+```js
+// package.json
+"scripts": {
+    "watch:css": "tailwindcss -i static/css/src/input.css -o static/css/output.css --watch",
+    "build:css": "tailwindcss -i static/css/src/input.css -o static/css/output.css --minify",
+    "sync": "browser-sync start --config sync-config.js",
+    "dev": "concurrently \"python manage.py runserver\" \"npm run watch:css\" \"npm run sync\""
+},
+```
+
+## Cotton
+
+Pass variable
+
+```html
+<c-note_item :note="note" />
+<!-- or -->
+<c-note_item note=note />
+```
+
+Pass value
+
+```html
+<c-image class="w-4 inline-block" url="images/heart.png" />
+```
+Naming convension: note_item.html
+
+Children: `{{slot}}`
+
+## Deploy to render
+
+```bash
+pip install gunicorn uvicorn whitenose
+pip freeze > requirements.txt
+```
+
+```bash
+# build.sh
+
+set -o errexit
+
+pip install -r requirements.txt
+
+python manage.py collectstatic --no-input
+
+python manage.py migrate
+```
+
+```py
+# settings.py
+
+DEBUG = 'RENDER' not in os.environ
+
+ALLOWED_HOSTS = []
+
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+
+
+MIDDLEWARE = [
+    ...
+    'whitenoise.middleware.WhiteNoiseMiddleware' # whitenose
+]
+
+
+# This production code might break development mode, so we check whether we're in DEBUG mode
+if not DEBUG:
+    # Tell Django to copy static assets into a path called `staticfiles` (this is specific to Render)
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+    # Enable the WhiteNoise storage backend, which compresses static files to reduce disk use
+    # and renames the files with unique names for each version to support long-term caching
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+```
+
+**Try on local**
+
+```
+python -m gunicorn project_name.asgi:application -k uvicorn.workers.UvicornWorker
+```
+
+## Dark mode no flicker
+
+```py
+# myapp/context_processors.py
+
+def theme(request):
+    # Default to 'light' if cookie is missing
+    return {'theme': request.COOKIES.get('theme', 'light')}
+```
+
+
+```py
+# settings.py
+
+TEMPLATES = [
+    {
+        ...
+        'OPTIONS': {
+            'context_processors': [
+               ...
+                'homepage.context_processors.theme'
+            ],
+        },
+    },
+]
+```
+
+```html
+<!-- templates/base.html ->
+
+<html lang="en" class="{{theme}}">
+```
+
+```js
+// toogle function
+    
+document.cookie = `theme=${newTheme}; path=/; max-age=31536000`;
+```

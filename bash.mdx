@@ -1,0 +1,107 @@
+---
+title: "Bash"
+date: "2-7-2025"
+tags: ["bash", "cmd"]
+image: "/images/notes/bash.png"
+---
+#### Group
+
+- add user to group
+
+```
+sudo usermod -aG group user
+```
+
+#### Check wake up devide
+
+```
+powercfg -devicequery wake_armed
+```
+
+#### Install custom fonts
+
+place fonts at ~/.local/share/fonts
+
+#### Install custom app
+
+- Extract and move app folde to /opt
+
+- Create app.desktop at /usr/share/applications
+
+```
+[Desktop Entry]
+Name=Firefox Developer Edition
+Comment=Web Browser
+Exec=/opt/firefox/firefox %u   
+Icon=/opt/firefox/browser/chrome/icons/default/default128.png
+Terminal=false
+Type=Application
+```
+
+#### Install nodejs
+
+- Add to ~/.bash_profile
+
+```
+export PATH=$PATH:/opt/node-v22/bin
+```
+
+#### Run npm with sudo
+
+```
+sudo env PATH="$PATH:/opt/node-v22.18.0/bin" npm
+```
+
+#### Format partion in cmd
+
+```
+format v: /fs:fat32
+```
+
+#### Rebuild uefi partiton
+
+```shell
+bcdboot c:\Windows /s <boot letter>: /f UEFI\
+```
+
+#### Add bash alias
+
+make alias permanent change file "~/.bash_profile"
+
+#### Kill running process at specific port
+
+```
+fuser -k 8080/tcp
+```
+
+#### List installed packed
+
+```
+dpkg -l | grep -i my-package
+sudo apt remove my-app
+```
+
+#### Git
+
+```
+git config --global --edit
+git remove show origin
+```
+
+#### Find files
+```
+find ./HD-MP3 -name use*.ts
+```
+
+#### Curl
+
+```
+curl -X POST -H "Content-Type: application/json" -d '{"username": "admin", "password": "123123"}' http://localhost:4000/api/auth/login
+
+````
+
+#### Linux
+
+```
+sudo add-apt-repository ppa:repository-name // add ppa repository
+```
