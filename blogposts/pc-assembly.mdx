@@ -1,0 +1,164 @@
+---
+title: "Assembling My First PC"
+date: "10-7-2025"
+tags: ["PC", "Desktop"]
+image: "/images/notes/first-pc/banner.jpeg"
+---
+
+## Video
+<details>
+  <summary>Video</summary>
+  <Video id="_CISM1QTBpo" />
+</details>
+
+- Nói chính xác hơn là chỉ dòng Cpu có hậu tố **F** (i3 12100F) thì sẽ không có card đồ họa tích hợp, các mã Cpu còn lại thì có bình thường
+
+- Tui dùng tản CR1000 4 ống với keo TF7, chạy Cinebench R15 Cpu full load 100% ở 4.09ghz thì nhiệt **max dưới 60 độ C**
+
+- Ở chỗ chia SSD theo giao thức mình tui nói nhầm, đúng là **PCIe** và **SATA** chứ không phải là NVME và Sata
+
+- Nếu mua thì nên mua card wifi chân M2 tốc độ sẽ cao hơn card wifi miniPCIe
+
+## Assembly
+
+- **Tui không phải dân chuyên, cách tui thực hiện điều dựa trên tài liệu, bạn nào cần thì xem tham khảo chơi**
+
+- Để lắp cho dễ thì mình gắn hoàn thiện main, hoàn thiện case, rồi lấy main bỏ vào case cắm dây, siết vít lại là done
+
+- Trong hợp main sẽ có fe chặn main (mình để ở mặt trong case rồi đẩy ra) và neo giữ SSD (phải đảm bảo siết chặc ổ cứng)
+
+- Sài lấy cây vít nhỏ với để tay thấp thấp thôi nha có rơi dô main thì cũng đỡ
+
+- Case kính thì nên để trên tấm vải hay gì đó
+
+### Cpu
+
+<details>
+  <summary>Video</summary>
+  <Short id="vyGOG38t5Wc" />
+</details>
+
+- Lắp Cpu không phức tạp nhưng <span className="text-red-500 font-bold">lắp sai có thể hư main, Cpu</span>
+
+- Cây gài cần <span className="text-red-500 font-bold">rất nhiều lực</span>
+  , khi gài phải chắc tay nếu để văng lại có thể gãy main
+
+<CustomImage
+  src="/images/notes/pc-things/install_cpu1.png"
+  width={600}
+  height={200}
+/>
+
+- Không tháo socket cover
+
+<CustomImage
+  src="/images/notes/pc-things/install_cpu2.png"
+  width={450}
+  height={300}
+/>
+
+- Đặt Cpu đúng vị trí các rảnh và ký hiệu
+
+- Socket Cpu intel khi lắp cần rất nhiều lực để có thể gài lại nên trước khi gài lại phải đảm bảo Cpu được lắp đúng, không lệnh, các rảnh phải đúng vị trí, dùng tay lắc nhẹ Cpu để make sure là nó ok
+
+### Ram
+
+<details>
+  <summary>Video</summary>
+   <Short id="2pey-BwTMPE" />
+</details>
+
+### M2 NVME Ssd
+
+<details>
+  <summary>Video</summary>
+   <Short id="IRqY_17IDoc" />
+</details>
+
+### Quạt tản nhiệt
+
+<details>
+  <summary>Video</summary>
+   <Short id="IIXWODRIOfg" />
+</details>
+
+<CustomImage
+  src="/images/notes/pc-things/why_need_thermal_paste.jpg"
+  width={500}
+  height={500}
+/>
+
+<a
+  href="https://www.intel.com/content/www/us/en/gaming/resources/how-to-apply-thermal-paste.html"
+  target="_blank"
+>
+  How to Apply Thermal Paste and How It Works
+</a>
+
+<CustomImage
+  src="/images/notes/pc-things/apply_thermal_paste.png"
+  width={500}
+  height={500}
+/>
+
+- Dùng vừa đủ là hiệu quả nhất, theo intel thì chỉ cần lượng keo cỡ hạt đậu xanh
+
+- Để áp lực từ block tản nhiệt trải đều keo trên bề mặt cpu sẽ tốt hơn thay vì dùng tay để giảm bọt khí
+
+- Khi siết lắp tản nên siết thay phiên nhau các con vít
+
+### Front panel header
+
+<CustomImage
+  src="/images/notes/first-pc/fp_header.jpg"
+  width={350}
+  height={240}
+/>
+
+## Extra
+
+### Làm lưới găn bụi từ khẩu trang y tế
+
+<CustomImage width={500} height={500} src="/images/notes/first-pc/make_the_filter.jpeg" />
+
+- Case tui hơi cùi nên không có lưới chống bụi nên tui phải tự làm
+
+- Dùng băng dính 2 mặt dán xung quanh
+
+- Cắt khẩu trang ra và lấy lớp vải mỏng nhất
+
+### 2 Usb port in 1 Usb header
+
+<details>
+  <summary>Video</summary>
+  <Short id="yU7CXY-gPiA" />
+</details>
+
+
+- Do chỉ có một Usb header (9pin) nên không đủ cho card wifi (để dùng bluetooth) và cổng Usb trên case
+
+<CustomImage width={120} height={120} src="/images/notes/first-pc/usb_header.png" />
+
+- Theo sơ đồ mạch thì usb header cung cấp được 2 Usb port, do đó mình sẽ gộp 2 chân cắm Usb 9pin thành thành 1
+
+<div className="grid not-prose grid-cols-1 md:grid-cols-2 gap-4">
+  <ImageFigure
+    text="Tháo các dây ra"
+    src="/images/notes/first-pc/pull_out.jpeg"
+    width={400}
+    height={400}
+  />
+  <ImageFigure
+    text="Gộp vào một chân cắm (đỏ - trắng - vàng/ xanh - đen)"
+    src="/images/notes/first-pc/combine.jpeg"
+    width={400}
+    height={400}
+  />
+</div>
+
+### Kết quả
+
+<CustomImage width={500} height={500} src="/images/notes/first-pc/banner.jpeg" />
+<CustomImage width={500} height={500} src="/images/notes/first-pc/case_1.jpeg" />
+<CustomImage width={500} height={500} src="/images/notes/first-pc/case_2.jpeg" />
+<CustomImage width={500} height={500} src="/images/notes/first-pc/case_3.jpeg" />
