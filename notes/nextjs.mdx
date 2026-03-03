@@ -113,3 +113,40 @@ image: "/images/notes/next.js.png"
 ### use 'callback' for custom session data
 - `jwt({toke, user})`, take user inputs
 - `session({token, session})`, store user inputs with custom format
+
+
+## next-themes
+
+```js
+import { ThemeProvider } from "next-themes";
+// wrap whole body of main layout
+
+<html lang="en" suppressHydrationWarning>
+    <body>
+        <ThemeProvider attribute="class">
+        ...
+```
+
+`suppressHydrationWarning`: It is used when the server-rendered HTML deliberately differs from the client-rendered output
+
+Toggle theme button
+
+```js
+import { useTheme } from "next-themes";
+
+const { setTheme, theme } = useTheme();
+
+const [isMount, setIsMount] = useState(false);
+
+useEffect(() => {
+    if (!isMount) setIsMount(true);
+}, []);
+
+...
+
+<button
+    onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+    className=""
+>
+
+```

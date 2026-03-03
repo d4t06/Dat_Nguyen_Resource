@@ -1,0 +1,86 @@
+---
+title: I Don't Know =]
+date: 1-3-2026
+tags: ["=]", "idk"]
+image: /images/notes/you_are_offline.jpg
+---
+
+## Magic SysRq
+
+**Enable Immediately (Temporary):**
+
+```bash
+sudo echo "1" > /proc/sys/kernel/sysrq
+```
+
+**Enable Permanently:**
+
+```bash
+echo "kernel.sysrq = 1" | sudo tee /etc/sysctl.d/99-sysrq.conf
+sudo systemctl restart systemd-sysctl.service
+```
+
+**Verification:**
+Check if it is enabled by running cat /proc/sys/kernel/sysrq. A value of 1 means it is enabled.
+
+
+**The "REISUB" Method (Safe Reboot)**
+
+This is a "backdoor" into the Linux Kernel that bypasses the frozen display and tells the hardware to shut down gracefully.
+
+1. Hold down Alt and the SysRq key (usually the same as Print Screen).
+
+2. While holding both, type the following letters slowly (about 1 second apart):
+`R — E — I — S — U — B`
+
+**Used Keys:**
+
+- `r:` Switch keyboard from raw mode to XLATE mode.
+- `e:` Send SIGTERM to all processes.
+- `i:` Send SIGKILL to all processes.
+- `s:` Sync all mounted filesystems.
+- `u:` Remount all filesystems read-only.
+- `b:` Immediately reboot the machine
+
+
+**One more "Soft" trick**
+
+Before doing the REISUB reboot, try switching to a TTY (Terminal). Sometimes the graphical interface is just "stuck" on a black frame:
+
+- Press Ctrl + Alt + F3.
+
+- If a black screen with text appears asking for a login, your system is fine! You can just type `sudo reboot` there.
+
+- To go back to your desktop, press Ctrl + Alt + F2 (or F1).
+
+
+## 6th-Gen Intel "Wake Fix"
+
+
+Since you have an Intel 6th Generation (Skylake) CPU, you are hitting a very specific, well-documented issue with the `i915` graphics driver's power-saving features.
+
+On this specific generation of Intel chips, two features called `Panel Self Refresh (PSR)` and `Display C-States (DC)` are notorious for failing to "wake up" the screen, even if the rest of the computer is running.
+
+1. Open your terminal and edit the GRUB file again:
+
+```
+sudo nano /etc/default/grub
+```
+
+2. Find your `GRUB_CMDLINE_LINUX` line. It currently looks like this: `GRUB_CMDLINE_LINUX="rhgb quiet acpi_osi='Windows 2020' i915.enable_psr=0 i915.enable_dc=0"`
+
+	- What these do: > * i915.enable_psr=0: Disables "Panel Self Refresh," which often gets stuck in a "blank" state during wake.
+
+	- i915.enable_dc=0: Disables "Display Power C-States," preventing the GPU from entering a sleep mode it can't exit.
+
+3. Apply:
+
+```
+sudo grub2-mkconfig -o /boot/grub2/grub.cfg
+```
+
+## Acer hidden boot entries
+<details>
+  <summary>Video</summary>
+  <Video id="zXyjDOfXW3w" />
+</details>
