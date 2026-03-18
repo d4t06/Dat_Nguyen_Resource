@@ -1,0 +1,53 @@
+---
+title: "Web Security"
+date: "20-1-2026"
+tags: ["Security"]
+image: "/images/notes/xss.jpg"
+---
+
+## XSS
+
+Cross Site Scripting
+
+- Should use innerText instead of innerHTML
+
+<CustomImage
+  src="/images/notes/security/xss.png"
+  width="1000"
+  height="500"
+/>
+
+
+<details>
+  <summary>Video</summary>
+  <Video id="ns1LX6mEvyM" />
+</details>
+
+
+<details>
+  <summary>Video</summary>
+  <Video id="6zMSwlGBmxs" time="840" />
+</details>
+
+
+## React2shell
+
+The vulnerability lies in the `Flight` Protocol of React Server Components (RSC)
+
+## CSRF
+
+Cross-Site Request Forgery
+
+Other site making request to your site
+
+`a:3000` and `a:3001` are considered different origins according to Cross-Origin Resource Sharing (CORS) rules. This mean you can't make request but `CORS` not prevent people from submiting form from other URLs
+
+Beside of sessionId, create csrfToken, store in use browser then send it via body everytime user make request to the server
+
+<details>
+  <summary>Video</summary>
+  <Video id="80S8h5hEwTY" />
+</details>
+
+
+

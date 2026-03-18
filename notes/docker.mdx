@@ -76,3 +76,43 @@ docker run -d -p 49161:1521 -p 5000:8080 -v db-vol:/opt/oracle/oradata oracleina
 `docker system df`: Amount of storage docker used
 
 `docker system prune`: Removes all stopped containers, unused networks, and dangling images.
+
+### Dockerfile
+
+Instructions for Docker to build an image
+
+Here's a simple `Dockerfile`
+
+```dockerfile
+FROM python:3.13.12-slim
+
+COPY . /app
+WORKDIR /app
+
+
+RUN python3 -m venv /opt/venv
+
+RUN /opt/venv/bin/pip install pip --upgrade && \
+    /opt/venv/bin/pip install -r requirement.txt && \
+    chomod +x entrypoint.sh
+
+CMD ["/app/entrypoint.sh"]
+```
+
+Let's break down this Dockerfile
+
+- `FROM`: Create a new build stage from a base image
+
+- `COPY`:  Copy files and directories
+
+- `WORKDIR`: This just changes the directory
+
+- `RUN`: Execute build commands.
+
+- `CMD`: Command to be executed when running a container from an image.
+
+
+
+## Compose file
+
+Used to configure your Docker application’s services, networks, volumes, and more.

@@ -26,7 +26,13 @@ window.addEventListener("mousedown", this.handleClickOutside.bind(this));
 
 ## Directive
 
-**<ng-content/>** can only exist once
+Directives add behavior to existing elements and components.
+
+Structural directives: *ngIf, *ngFor add/remove DOM.
+
+Attribute directives: [ngClass].
+
+`<ng-content/>` can only exist once
 
 ```html
 <ng-template #projected>
@@ -126,3 +132,11 @@ window.addEventListener("mousedown", this.handleClickOutside.bind(this));
 | **Retry Logic** | Difficult; requires manual recursion or utility functions. | Easy; has built-in operators like `retry()` or `retryWhen()`. |
 | **Transformations** | Limited to `.then()` chaining. | Extremely powerful via **Pipeable Operators** (map, filter, switchMap). |
 | **Multiple Listeners**| **Multicast:** All listeners get the same resolved value. | **Unicast by default:** Each subscriber starts a new execution of the observable. |
+
+
+<CustomImage
+  src="/images/notes/angular/rxjs_promise.png"
+  width="1000"
+/>
+
+
