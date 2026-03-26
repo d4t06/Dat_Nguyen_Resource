@@ -1,0 +1,301 @@
+---
+title: "Dart"
+date: "23-3-2026"
+tags: ["Dart", "Flutter"]
+image: "/images/notes/dart/dart.png"
+---
+
+
+
+
+## Basic
+
+### Init
+
+Create new dart project
+
+```bash
+dart create cli
+
+cd cli
+dart run
+```
+
+### Table
+
+| Category | Type / Keyword | Mutable | Behavior |
+| :--- | :--- | :--- | :--- |
+| **Numbers** | `int`, `double` | ❌ | Values like `5` or `3.14` cannot be changed; variables just point to new numbers. |
+| **Strings** | `String` | ❌ | Once created, characters cannot be altered. Methods like `.toUpperCase()` return a **new** string. |
+| **Booleans** | `bool` | ❌ | `true` and `false` are constant singletons. |
+| **Collections** | `List`, `Map`, `Set` | ✅ | Elements can be added, removed, or updated unless defined as `const`. |
+| **Collections** | `const [...]` | ❌ | The collection is frozen at compile-time; attempting to modify it causes a runtime error. |
+| **Variables** | `final` | ❌ | The variable cannot be reassigned to a new object, **but the object's internal data can still change.**  (Variable Immutable)|
+| **Variables** | `const` | ❌ | The variable is locked AND the object it points to is transitively frozen (cannot change anything inside). |
+| **Custom Classes** | `class` | ✅ | Fields can be changed at any time unless marked `final`. |
+
+
+**Variable Immutability (final)**
+
+- Example: final myList = [1, 2];
+
+- You **cannot** do: myList = [3, 4];
+
+- You **can** do: myList.add(3);
+
+
+### Var keyword
+
+The keyword `var` tells the compiler: "I am not going to tell you the type; please figure it out yourself"
+
+```dart
+var name = 'dat';
+const age = 23;
+final feel = 'good';
+
+
+String lastName = 'nguyen'
+lastName = 'nguyen huu'
+
+// this not gonna work
+// var String fullName = 'nguyen huu dat';
+
+int height = 175;
+bool taken = false;
+
+const String nickName = 'giao_su'
+nickName = 'dat_dep_try' // error
+
+```
+
+### Lists
+
+Ordered, allows duplicate
+
+```dart
+List<String> fruits = ['Apple', 'Banana', 'Orange', 'Apple'];
+print(fruits); // Output: [Apple, Banana, Orange, Apple]
+print(fruits[0]); // Output: Apple
+```
+
+Common Methods: add(), addAll(), remove(), removeAt(), indexOf(), sort(), sublist()
+
+
+### Sets
+
+No ordered, not allow duplicate
+
+Provide fast lookup using `contains()`
+
+```dart
+Set<String> names = {'Zhang San', 'Li Si', 'Zhang San'};
+print(names); // Output: {Zhang San, Li Si}
+names.add('Li Si'); // Attempting to add a duplicate
+print(names); // Output: {Zhang San, Li Si} (no change)
+```
+
+
+Convert between a List and a Set using the extension methods `.toList()` and `.toSet()`. Converting a list with duplicates to a set automatically removes the duplicates.
+
+### Maps
+
+```dart
+Map<String, int> inventory = {
+  'cakes': 20,
+  'pies': 14,
+  'donuts': 37,
+};
+
+
+print(inventory['cakes']);
+```
+
+### final and const
+
+`final`
+
+Runtime: When you fetch data, you don't know what type of returned data is and you want to prevent the variable from being reassigned to a different map
+
+```dart
+
+// The variable 'userData' cannot point to a new map, but we can change its contents.
+final userData = await fetchUserFromApi(); 
+
+userData['lastLogin'] = DateTime.now().toString(); // This is allowed.
+
+// userData = {}; // This is NOT allowed (reassignment error).
+
+```
+
+`const`
+
+Compile-time: Before the app even runs.
+
+``` dart
+const time = DateTime.now(); ❌
+```
+
+```dart
+ 
+// The entire map is "frozen" and cannot be modified.
+const rolePermissions = {
+  'admin': 'full_access',
+  'user': 'read_only',
+};
+
+// rolePermissions['guest'] = 'none'; // This would throw a runtime error!
+
+```
+
+### String interpolation
+
+```dart
+print("my name is $name");
+print("my name is ${person.name}");
+```
+
+### Null safety
+
+By default, all variables in Dart are non-nullable.
+
+```dart
+int? age; // 'age' can be int or null
+
+int? nullableAge = 30;
+int nonNullableAge = nullableAge!; // Null Assertion
+
+String? name;
+String user = name 	 'Guest'; // If 'name' is null, use 'Guest'
+
+String? name;
+int? length = name?.length; // Avoid runtime error
+
+```
+
+**Local Shadowing**
+
+```dart 
+Product? product;
+if (product != null) {
+  return Text(product!.name); // The '!' forces it to be non-nullable
+}
+
+
+Product product = Product.blank();
+// Now you can use 'product' without '!'
+return Text(product.name); 
+```
+
+### Function
+
+```dart
+void main() {
+	final greeting = greet("dat", 23);
+	print(greeting);
+}
+
+String greet(String name, int age) {
+	return "Hi. my name is $name and I am $age";
+}
+```
+
+<CustomImage
+	width="916"
+	height="193"
+	style="max-width:100%;"
+	src="/images/notes/dart/dart-function.png"
+/>
+
+<CustomImage
+	width="767"
+	height="155"
+	style="max-width:100%;"
+	src="/images/notes/dart/dart-function-1.png"
+/>
+
+
+```dart
+List<int> scores = [50, 24, 11, 77];
+print(scores[0]);
+```
+
+### Generic
+
+```dart
+class Collection<T> {
+	String name;
+	List<T> data;
+
+	Collection(this.name, this.data);
+
+	T randomItem() {
+		data.shuffle();
+		return data[0];
+	}
+}
+
+
+var foods = Collection<String>('food', ['noddle', 'pho', 'banh mi']);
+
+var item = foods.randomItem(); // item is has String type
+```
+
+Use `var` when create class instance to keep cleaner
+
+- Long: `Map<String, List<User>> users = Map<String, List<User>>();`
+
+- Clean: `var users = <String, List<User>>{};`
+
+### Async
+
+```dart
+void main() async {
+
+  Future<Book> fetchBook() {
+    print("Fetching");
+    const delay = Duration(seconds: 3);
+
+    return Future.delayed(delay, () {
+      return Book('Best book ever', 'Various author');
+    });
+
+  }
+
+ var book = await fetchBook();
+ print(book.title);
+}
+
+class Book {
+  String title;
+  String author;
+
+  Book(this.title, this.author);
+}
+```
+
+
+### Name constuctor
+
+```dart
+// Default, unnamed constructor
+Person(this.name, this.age);
+
+// Named constructor for a guest user
+Person.guest() : name = 'Guest', age = 0;
+```
+
+### Fetching data
+
+```dart
+var uri = Uri.https('fakestoreapi.com', '/products/1');
+
+var response = await http.get(uri);
+
+if (response.statusCode == 200) {
+  var jsonResponse =
+      convert.jsonDecode(response.body) as Map<String, dynamic>;
+  print("res: ${jsonResponse['title']}");
+} else {
+  print('Request failed with status: ${response.statusCode}.');
+}
+```

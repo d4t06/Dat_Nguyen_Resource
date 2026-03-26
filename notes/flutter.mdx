@@ -1,0 +1,282 @@
+---
+title: "Flutter"
+update: "4-7-2025"
+date: "24-3-2026"
+tags: ["Flutter"]
+image: "/images/notes/flutter.png"
+---
+
+
+
+## Great Videos
+
+<details>
+  <summary>Video</summary>
+  <Video id="_7qv9zHEgTc" />
+</details>
+
+## Set up
+
+Dowload [flutter](https://docs.flutter.dev/install/manual)
+
+Download [command-line tool](https://developer.android.com/studio#command-line-tools-only) and [platform-tools](https://developer.android.com/tools/releases/platform-tools) and place in ../android-sdk
+
+Use command-line tool **sdkmanager** to download **platforms** and **build-tools**
+
+```bash
+/opt/flutter/android-sdk
+
+├── build-tools
+├── cmdline-tools
+|   ├── latest
+├── licenses
+├── platforms
+└── platform-tools
+```
+
+flutter config --android-sdk
+
+
+Install linux tool 
+```
+dnf install clang cmake ninja-build gtk3-devel mesa-demos
+```
+
+### Linux native support
+
+Flutter works almost exactly the same on a Linux window as it does on an Android phone. Since Flutter draws its own pixels using the Impeller/Skia engine, the buttons, colors, and animations you see on Linux will look identical on Android.
+
+However, there are a few "hidden" differences to keep in mind:
+
+**What is the "Same"?**
+
+-	UI Layout: If it fits on a Linux window resized to phone dimensions, it will fit on the phone.
+
+-	Business Logic: Your math, API calls (HTTP), and data processing code will behave identically.
+
+-	Hot Reload: You get the same instant updates on Linux as you do on the phone.
+
+**What is "Different"?**
+
+- Screen Density (DPI): A "pixel" on your laptop monitor is much larger than a pixel on a high-res phone screen. Text might look crisp on your laptop but tiny or different on the phone.
+
+- Touch vs. Mouse: Linux uses a mouse cursor (hover effects work); Android uses touch (no hover, has gestures like long-press).
+
+- System APIs: Code for the Camera, GPS, Bluetooth, or Notifications will crash or do nothing on Linux unless you write specific desktop code for them.
+
+- File Paths: Saving a file to /home/user/documents on Linux won't work on Android's sandboxed filesystem. Use the path_provider plugin to handle this automatically for both.
+
+**The "Pro" Workflow for Laptops**
+
+1. Develop on Linux Desktop (-d linux): Use this for 90% of your work (styling, navigation, logic). It’s the fastest way to iterate.
+
+2. Resize the Window: Manually shrink your Linux app window to a "phone shape" to check your layout.
+
+3.Final Check on Phone (-d android): Once a feature is done, run it on your physical phone via USB/Scrcpy to test touch feel and performance.z
+
+## Best practices
+
+1. Keep widget single responsibility, separate ui from logic
+
+2. Keep widget short, 200 lines of code is the best
+
+3. snake_case naming
+
+4. Follow flutter flutter repository
+
+5. Folder structure, DDD
+
+6. Start your code with ci/cd in mind
+
+7. Not hard code style in to widget
+
+8. Use `const` when ever possible
+
+## Basic
+
+### Init
+
+```bash
+flutter create my_project
+```
+
+Simple flutter app
+
+```dart
+void main() {
+  runApp(
+    MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text("My app"),
+          centerTitle: true,
+          backgroundColor: Colors.brown,
+          ),
+        body: Text("This is simple text"),
+        ),
+      
+    ),
+  ); 
+}
+
+```
+
+To get hot reload work during development
+
+```dart
+body: Home()
+
+...
+class Home extends StatelessWidget {
+  const Home({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Text("Hi, there");
+  }
+}
+```
+
+## Widgets
+
+### Layout
+
+All layout widgets have either of the following:
+
+- A child property if they take a single child—for example, `Center` or `Container`
+
+- A children property if they take a list of widgets—for example, `Row`, `Column`, `ListView`, or `Stack`.
+
+```dart
+Column(
+  children: [
+    Container(
+      padding: EdgeInsets.all(20),
+      color: Colors.grey[300],
+      child: Row(
+        children: [
+          Image.asset('assets/img/heart.png', width: 24),
+          Container(margin: EdgeInsets.only(left: 10), child: Text("3")),
+          Expanded(child: SizedBox()),
+          FloatingActionButton(
+            onPressed: onPress,
+            child: Text(
+              "+",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight(700)),
+            ),
+          ),
+        ],
+      ),
+    ),
+  ],
+),
+```
+
+`Container`: Like div in html
+- Decoration,  padding, margin
+- BoxConstraints: Constraint by the given size
+
+`ListView`: Scrollable list
+
+`Cart`: Material widget has some built-in props
+
+`SizedBox`: Add addition space
+
+`Row`: Display content in a Row
+
+`Wrap`: Wrap with in `Row` to flex wrap content
+
+`Column`: Display content in Column
+
+`Expanded`: Act like flex item
+
+`FittedBox`: Scales and positions its child within itself according to fit.
+
+`Scaffold`: App backgroundColor
+
+`AppBar`: App bar
+
+### User input
+
+`FloatingActionButton`
+
+## Custom component
+
+```dart
+
+class ButtonProps {
+  Widget child;
+   Function() onPress;
+
+  ButtonProps(this.child, this.onPress);
+}
+
+class MyButton extends StatelessWidget {
+
+  const MyButton({super.key, required this.props});
+  final ButtonProps props;
+
+  @override
+  Widget build(BuildContext context) {
+    return  FloatingActionButton(
+      onPressed: props.onPress,
+      child: props.child
+    );
+  }
+}
+...
+MyButton(props: ButtonProps(Text("hehe"), onPress))
+```
+
+### Apply custom font
+
+Add font to `assets/fonts`
+
+Modify pubspec.yaml
+
+```yaml
+flutter:
+  fonts:
+    - family: MyCustomFont
+      fonts:
+        - asset: assets/fonts/MyVariableFont.ttf
+```
+
+Run: `flutter pub get`
+
+Apply
+
+```dart
+Text(
+  'Hello Variable Font',
+  style: TextStyle(
+    fontFamily: 'MyCustomFont',
+    fontWeight: FontWeight.w700, // Vary this for weight changes
+  ),
+)
+```
+
+Apply entire app
+
+```dart
+MaterialApp(
+  theme: ThemeData(
+    fontFamily: 'MyCustomFont',
+  ),
+  home: MyHomePage(),
+);
+``` 
+
+
+### File content structure
+
+Variables/State Variables: Define state variables at the top.
+
+Lifecycle Methods: `initState()`, `dispose()`, etc.
+
+`build` Method: The top-level UI description.
+
+Helper Methods/UI Functions: Small functions for rendering specific widgets (e.g., `_buildHeader()`).
+
+Logic Handlers: Functions that update state (e.g., `_onLoginPressed()`). 
+
