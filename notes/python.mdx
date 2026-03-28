@@ -68,14 +68,15 @@ x = x + 1
 
 ### List
 
-- Ordered, mutable, allow duplicate
+**Ordered, mutable, allow duplicate**
+
 ```python
 colors = ["red", "green", "blue"]
 ```
 
-- **append()** to add item at end, **insert()** to add item at specified index
+`append()` to add item at end, `insert()` to add item at specified index
 
-- **extend()** use to append a list with iterable objects (**lists, tupe, set, dict**)
+`extend()` use to append a list with iterable objects (**lists, tupe, set, dict**)
 
 ```python
 s1 = {7,8,9}
@@ -90,13 +91,24 @@ l1.extend(d1)
 print(l1) # [1, 2, 3, 8, 9, 7, 4, 5, 6, '99']
 ```
 
-- **remove(item)**, **pop(index)** if you do not specify the index, pop the last
+`remove(item)`, `pop(index)` if you do not specify the index, pop the last
 
-- **del()** remove the variable while **clear()** clearing items
+`del()` remove the variable while `clear()` clearing items
 
-- Copy a list: **copy( )**, **list( )**, **l1[ : ]**
+**Shallow copy**
 
-- Use ``*`` to repeating list or tuple
+```py
+l1 = [1,2,3]
+l2 = l1
+
+l2.append(4)
+
+print(l1) #[1,2,3,4]
+```
+
+Copy a list: **copy( )**, **list( )**, **l1[ : ]**
+
+Use ``*`` to repeating list or tuple
 
 ```python
 l2 = l1 * 2
@@ -120,7 +132,7 @@ print(l2) # [1,2,3]
 
 ### Tuple
 
-- Ordered, immutable
+**Ordered, immutable**
 
 ```python
 location = (40.7, 74.0)
@@ -128,7 +140,7 @@ location = (40.7, 74.0)
 
 ### Dict
 
-- Ordered, mutable but the keys must be immuatable, value can be any
+**Ordered, mutable but the keys must be immuatable, value can be any**
 
 ```python
 user = {"name": "A", "age": 22}
@@ -137,11 +149,11 @@ user = {"name": "A", "age": 22}
 
 ### Sets
 
+**Unordered, mutable, can only contain unique and immutable items, fast for lookup (use `in`)**
+
 ```python
 my_set = {1, 9, 22, '1', '3'}
 ```
-
-- Unorder, mutable, can only contain unique and immutable items, fast for lookup (use `in`)
 
 - **add()** add item to set (only **immutable**)
 
@@ -154,6 +166,23 @@ my_set = {1, 9, 22, '1', '3'}
 - When use pop(), you do not know which item that gets removed.
 
 
+**Set operators**
+
+Intersection `&`: Returns elements common to both sets.
+
+- Example: `{1, 2} & {2, 3} → {2}`
+
+Union `|`: Returns all unique elements from both sets.
+
+- Example: `{1, 2} | {2, 3} → {1, 2, 3}`
+
+Difference `-`: Returns elements in the first set but not the second.
+
+- Example:`{1, 2} - {2, 3} → {1}`
+
+Symmetric Difference `^`: Returns elements in either set, but not both.
+
+- Example: `{1, 2} ^ {2, 3} → {1, 3}`
 
 ## Walrus operator
 
@@ -349,7 +378,7 @@ from functools import reduce
 sorted_words = sorted(colors, key=lambda x: len(x))
 ```
 
-## Classes
+## OOP
 
 ```py
 class Vehicle:
@@ -400,6 +429,10 @@ p1 = Person("Emil", 25)
 print(p1.name)
 print(p1.__age) # This will cause an error 
 ```
+
+### Polymorphism
+
+### Abstraction
 
 ## F-String
 

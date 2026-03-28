@@ -27,90 +27,107 @@ image: "/images/notes/next.js.png"
 - Fetching wherever need data, because fetch requests are auto memoried
 
 ## Caching
-### Request Memorization
-- Where: Server, 
-- Duration: Untill React has finish rendering
-- Purpose: Re-use data in React component tree
 
-- React feature, applies to the GET request
-- Don't apple to router handler
+### Request Memorization
+
+Where: Server
+
+Duration: Untill React has finish rendering
+
+Purpose: Re-use data in React component tree
+
+React feature, applies to the GET request
+
+Don't apple to router handler
 
 ### Data cache (Fetch)
-#### what is
-- Where: Server
-- Duration: Persistent unless revalidate or opt-out
-- Purpose: Store data across request
 
-- An request send, if a cached found, it return immediately
-- if a cached not found, the request is made to the date source and store in the Data Cache
+**What is**
 
-- Difference with Request Memoization, Data cached is persistent across incoming requests and deployement, whereas memoization only in the same render
+Where: Server
+Duration: Persistent unless revalidate or opt-out
+Purpose: Store data across request
 
-#### Revaliate
-- Time base: use 'revalidate = 10'
+An request send, if a cached found, it return immediately
+if a cached not found, the request is made to the date source and store in the Data Cache
+
+Difference with Request Memoization, Data cached is persistent across incoming requests and deployement, whereas memoization only in the same render
+
+**Revaliate**
+
+Time base: use 'revalidate = 10'
     - The first request is called, the date will be fetched from data source and store in the Data Cached
     - Request under 10s will return cached date
     - After 10s, the next request will still return the cached data and in that request Next will trigger revalidate on the background and date the cached data
 
-- On-Demand: use revalidateTag or revalidatePath
+On-Demand: use revalidateTag or revalidatePath
     - The first request is called, the date will be fetched from data source and store in the Data Cached
     - When revalidate is trigger, the target cache will be purge
     - The next time a request is made, it will run like first request
 
-#### Opt-out
-- `fetch(`https://...`, { cache: 'no-store' })`
+**Opt-out**
 
-- export const dynamic = 'force-dynamic', will effect all requests in the route
+1. `fetch(`https://...`, { cache: 'no-store' })`
+2. export const dynamic = 'force-dynamic', will effect all requests in the route
 
 ### Full Route Cache
-#### what is 
-- Where: Server
-- Purpose: HTML and RSC (React Server Compoent) payload for faster page load
-- Duration: By default it persistent
+**What is**
 
-- Only cached static render route
-- Unlike Date Cache across the deployments, the Full Route Cache will purge in new deploy
+Where: Server
+Purpose: HTML and RSC (React Server Compoent) payload for faster page load
+Duration: By default it persistent
 
-#### Revalidate
-- Revalidate the Data Cached
+Only cached static render route
+Unlike Date Cache across the deployments, the Full Route Cache will purge in new deploy
 
-#### Opting out
-- use Dynamic Function like 'cookies()' will skip Full Route and still use Data cache
-- use 'revalidate = 0' will skip the Full Route & Data Cached, mean component will rerender on each request
-- Opt-out the Data Cach by make `fetch(`https://...`, { cache: 'no-store' })`
-- when page set 'revalidate = 0', run every revalidate tag will reload this page
+**Revalidate**
+Revalidate the Data Cached
+
+**Opting out**
+
+1. use Dynamic Function like 'cookies()' will skip Full Route and still use Data cache
+2. use 'revalidate = 0' will skip the Full Route & Data Cached, mean component will rerender on each request
+3. Opt-out the Data Cach by make `fetch(`https://...`, { cache: 'no-store' })`
+4. when page set 'revalidate = 0', run every revalidate tag will reload this page
 
 
 ### Router Cache
-#### What is
-- Where: Client
-- Purpose: Reduce server request when navigation
-- Duration: 
+**What is**
 
-- Client-side Cached include both visited and prefetched
-- Unlike Full Route Cached, it temparory store RSC payload in the browser, whereas Full Route Cached store persistent store RSC payload and HTML
-- Apply to both static and dynamic route
+Where: Client
+Purpose: Reduce server request when navigation
+Duration: 
 
-### Revalidte
-- Calling route.refresh()
-- Revalidate Data Cache with on-demand revalidate
-- Ussing cookies prevent route use cookie from old data
+Client-side Cached include both visited and prefetched
+Unlike Full Route Cached, it temparory store RSC payload in the browser, whereas Full Route Cached store persistent store RSC payload and HTML
+Apply to both static and dynamic route
 
-### NEXT API
-- route.refresh(): will make the new request for the current route
-    - route.refresh() do not affect the Data or Full Route Cache
+**Revalidte**
 
-- dynamic = 'force-dynamic': Opt-out Date and Full Route Cache
-- revalidate = 0: Opt-out Date and Full Route Cache
-- Dynamic function like 'header'...: Opt-out Full Route Cache, in other words, the route will dynamic rerender   
-- revalidateTag, revalidatePath: Revalidate the Data and Full Route Cache
+1. Calling route.refresh()
+2. Revalidate Data Cache with on-demand revalidate
+3. Using cookies prevent route use cookie from old data
+
+## NEXT API
+
+`route.refresh()`: will make the new request for the current route, do not affect the Data or Full Route Cache
+
+dynamic = 'force-dynamic': Opt-out Date and Full Route Cache
+
+revalidate = 0: Opt-out Date and Full Route Cache
+
+Dynamic function like 'header'...: Opt-out Full Route Cache, in other words, the route will dynamic rerender   
+
+`revalidateTag, revalidatePath`: Revalidate the Data and Full Route Cache
 
 ## Next Auth
+
 - getServerSession(option) , server
 - useServerSession(), client - context
 - all request handled by api/auth/[...nextauth]/ts
 
 ### use 'callback' for custom session data
+
 - `jwt({toke, user})`, take user inputs
 - `session({token, session})`, store user inputs with custom format
 
