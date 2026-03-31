@@ -47,12 +47,14 @@ let myModule = (() => {
 
 ## ASI
 
+**Automatic Semicolon Insertion**
+
 ```js
 let obj = {a:123}
-[obj].forEach() // error
+[obj].forEach() // Cannot access 'obj' before initialization
 
-let obj = {a:123};
-[obj].forEach() // {a: 123}
+let obj = { a: 123 }
+[obj].forEach(a => console.log(a)); // {a: 123}
 ```
 
 ## Single pattern
