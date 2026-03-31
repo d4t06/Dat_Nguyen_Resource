@@ -186,6 +186,28 @@ Product product = Product.blank();
 return Text(product.name); 
 ```
 
+
+### Cascade
+
+Allows you to perform a sequence of operations (method calls, property settings) on the same object without repeatedly typing the object's name
+
+```dart
+var paint = Paint();
+paint.color = Colors.black;
+paint.strokeCap = StrokeCap.round;
+paint.strokeWidth = 5.0;
+```
+
+Using cascade
+
+```dart
+var paint = Paint()
+  ..color = Colors.black
+  ..strokeCap = StrokeCap.round
+  ..strokeWidth = 5.0;
+```
+
+
 ### Function
 
 ```dart

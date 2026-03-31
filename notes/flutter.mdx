@@ -15,6 +15,12 @@ image: "/images/notes/flutter.png"
   <Video id="_7qv9zHEgTc" />
 </details>
 
+
+<details>
+  <summary>Video</summary>
+  <Video id="FCyoHclCqc8" />
+</details>
+
 ## Set up
 
 Dowload [flutter](https://docs.flutter.dev/install/manual)
@@ -137,84 +143,24 @@ class Home extends StatelessWidget {
 }
 ```
 
-## Widgets
+### Lifecycle
 
-### Layout
+`initState()`: Called only once the widget is created
 
-All layout widgets have either of the following:
+`build()`: Called after `initState()`, and every we use `setState()`
 
-- A child property if they take a single child—for example, `Center` or `Container`
-
-- A children property if they take a list of widgets—for example, `Row`, `Column`, `ListView`, or `Stack`.
-
-```dart
-Column(
-  children: [
-    Container(
-      padding: EdgeInsets.all(20),
-      color: Colors.grey[300],
-      child: Row(
-        children: [
-          Image.asset('assets/img/heart.png', width: 24),
-          Container(margin: EdgeInsets.only(left: 10), child: Text("3")),
-          Expanded(child: SizedBox()),
-          FloatingActionButton(
-            onPressed: onPress,
-            child: Text(
-              "+",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight(700)),
-            ),
-          ),
-        ],
-      ),
-    ),
-  ],
-),
-```
-
-`Container`: Like div in html
-- Decoration,  padding, margin
-- BoxConstraints: Constraint by the given size
-
-`ListView`: Scrollable list
-
-`Cart`: Material widget has some built-in props
-
-`SizedBox`: Add addition space
-
-`Row`: Display content in a Row
-
-`Wrap`: Wrap with in `Row` to flex wrap content
-
-`Column`: Display content in Column
-
-`Expanded`: Act like flex item
-
-`FittedBox`: Scales and positions its child within itself according to fit.
-
-`Scaffold`: App backgroundColor
-
-`AppBar`: App bar
-
-### User input
-
-`FloatingActionButton`
-
-## Custom component
+`dispose()`: When the widget()/ state object is removed
+ 
+### Custom component
 
 ```dart
-
-class ButtonProps {
-  Widget child;
-   Function() onPress;
-
-  ButtonProps(this.child, this.onPress);
-}
 
 class MyButton extends StatelessWidget {
 
-  const MyButton({super.key, required this.props});
-  final ButtonProps props;
+  final Widget child;
+  final Function()? onPress;
+
+  const MyButton({this.child, this.onPress});
 
   @override
   Widget build(BuildContext context) {
@@ -280,3 +226,286 @@ Helper Methods/UI Functions: Small functions for rendering specific widgets (e.g
 
 Logic Handlers: Functions that update state (e.g., `_onLoginPressed()`). 
 
+### Route and navigate
+
+**Basic push screen navigate**
+
+```dart
+void _onTapNavigate(BuildContext context, int id) {
+  Navigator.push(
+    context,
+    MaterialPageRoute(builder: (context) => ProductDetail(id)),
+  );
+}
+```
+
+**Route generator**
+
+Create `route.dart`
+
+```dart
+const HOME_ROUTE = '/';
+const PRODUCT_DETAIL_ROUTE = '/product_detail';
+
+class RouterGenerator {
+
+  static RouteFactory routes() {
+    return (settings) {
+      final  agrs = settings.arguments as Map<String, dynamic>;
+
+
+      Widget screen;
+
+      switch(settings.name) {
+        case HOME_ROUTE:
+          screen = Home();
+          break;
+        case PRODUCT_DETAIL_ROUTE:
+          screen = ProductDetail(agrs['id']);
+          break;
+        default:
+         screen = NotFound();
+      }
+
+
+      return MaterialPageRoute(builder: (context) => screen);
+
+    };
+  }
+
+}
+```
+
+app.dart
+
+```dart
+class App extends StatelessWidget {
+  const App({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Home(),
+      onGenerateRoute: RouterGenerator.routes(),
+    );
+  }
+}
+```
+
+Navigate
+
+```dart
+void _onTapNavigate(BuildContext ct, int id) {
+  Navigator.pushNamed(ct, PRODUCT_DETAIL_ROUTE, arguments: {'id': id});
+}
+```
+
+
+*MediaQuery.sizeOf(context)*: Rebuilds the widget only when the size property (width and height) changes.
+
+
+### Navigator
+
+`push()`: Adds a new route to the top of the stack.
+Use case: Standard forward navigation, allowing the user to return to the previous screen using the back button.
+- Example: `Navigator.push(context, MaterialPageRoute(builder: (context) => SecondRoute()),)`;.
+
+`pop()`: Removes the current route from the top of the stack and returns to the previous screen.
+Use case: Going back to the previous screen. The system back button and the AppBar back button typically call this automatically.
+- Example: `Navigator.pop(context);`.
+
+`pushNamed()`: Navigates to a new route using a predefined string name.
+Use case: Used in large apps to centralize route definitions and avoid code duplication. Requires defining a routes map or onGenerateRoute in your MaterialApp.
+- Ex: `Navigator.pushNamed(ct, PRODUCT_DETAIL_ROUTE, arguments: {'id': id})`;
+
+
+`pushReplacement()`: Replaces the current route on the stack with a new one.
+
+Use case: Scenarios where the user should not be able to return to the previous screen (e.g., after a login/onboarding flow).
+
+`pushAndRemoveUntil()`: Pushes a new route onto the stack and removes all previous routes until a specific condition (predicate) is met.
+Use case: Clearing the entire navigation history, such as after logging out, and returning to the main login or welcome screen.
+
+`popUntil()`: Removes routes from the top of the stack until a given predicate returns true 
+
+
+### Share state between widgets
+
+`home.dart`
+
+```dart
+class _HomeState extends State<Home> {
+  final _controller = ProductController();
+  ...
+  @override
+  Widget build(BuildContext context) {
+    ...
+    TopSearch(onSearch:_controller.searchProducts),
+    ListenableBuilder
+      listenable: _controller,
+      builder: (context, child) {
+      // access _controller.isLoading 
+      },
+    ),
+    ...
+  }
+}
+```
+
+`controller.dart`
+
+```dart
+class ProductController extends ChangeNotifier {
+  bool _isLoading = true;
+  bool get isLoading => _isLoading;
+
+  Future<void> getProducts() async {
+    this._isLoading = true;
+    notifyListeners();
+    ...
+  }
+}
+```
+## Provider
+
+`prodivers/product_provider.dart`
+
+```dart
+class ProductProvider extends ChangeNotifier {
+  bool _isLoading = true;
+  bool get isLoading => _isLoading;
+
+  Future<void> getProducts() async {
+    this._isLoading = true;
+    notifyListeners();
+    ...
+  }
+}
+```
+
+`main.dart`
+
+```dart
+void main() {
+  runApp(
+    MultiProvider(
+      providers: [ChangeNotifierProvider(create: (_) => ProductProvider())],
+      child: const App(),
+    ),
+  );
+}
+```
+`Home.dart`, a consumer
+
+```dart
+return Consumer<CartModel>(
+  builder: (context, cart, child) {
+    return Text('Total price: ${cart.totalPrice}');
+  },
+);
+```
+
+The third argument is child, which is there for optimization. If you have a large widget subtree under your Consumer that doesn't change when the model changes, you can construct it once and get it through the builder.
+
+```dart
+return Consumer<CartModel>(
+  builder: (context, cart, child) => Stack(
+    children: [
+      // Use SomeExpensiveWidget here, without rebuilding every time.
+      ?child,
+      Text('Total price: ${cart.totalPrice}'),
+    ],
+  ),
+  // Build the expensive widget here.
+  child: const SomeExpensiveWidget(),
+);
+```
+
+<mark>Put your Consumer widgets as deep in the tree as possible.</mark>
+
+The easiest way to read a value is by using the extension methods on [BuildContext]:
+
+- `context.watch<T>()`, which makes the widget listen to changes on T
+- `context.read<T>()`, which returns T without listening to it
+- `context.select<T, R>(R cb(T value))`, which allows a widget to listen to only a small part of T.
+
+One can also use the static method `Provider.of<T>(context)`, which will behave similarly to `watch`. When the `listen` parameter is set to false (as in `Provider.of<T>(context, listen: false))`, then it will behave similarly to `read`.
+
+It's worth noting that `context.read<T>()` won't make a widget rebuild when the value changes and it cannot be called inside `StatelessWidget.build/State.build`. On the other hand, it can be freely called outside of these methods.
+
+## Widgets
+
+### Layout
+
+All layout widgets have either of the following:
+
+- A child property if they take a single child—for example, `Center` or `Container`
+
+- A children property if they take a list of widgets—for example, `Row`, `Column`, `ListView`, or `Stack`.
+
+```dart
+Column(
+  children: [
+    Container(
+      padding: EdgeInsets.all(20),
+      color: Colors.grey[300],
+      child: Row(
+        children: [
+          Image.asset('assets/img/heart.png', width: 24),
+          Container(margin: EdgeInsets.only(left: 10), child: Text("3")),
+          Expanded(child: SizedBox()),
+          FloatingActionButton(
+            onPressed: onPress,
+            child: Text(
+              "+",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight(700)),
+            ),
+          ),
+        ],
+      ),
+    ),
+  ],
+),
+```
+
+`Container`: Like div in html
+- Decoration: `BoxDecoration`
+  - borderRadius: `BorderRadius`
+  - border: `Border`
+  - color: `Colors`
+  - boxShadow: `[BoxShadow]`
+- padding, margin: `EdgeInsets`
+- BoxConstraints: Constraint by the given size
+
+`ListView`: Scrollable list
+
+`Cart`: Material widget has some built-in props
+
+`SizedBox`: Add addition space
+
+`Expanded`: `flex-grow:1`
+
+`Row`: Display content in a Row
+- Take up as much horizontal space
+
+`Wrap`: Wrap with in `Row` to flex wrap content
+
+`Column`: Display content in Column
+- Take up as much vertical space
+
+`Stack`: Container allow item to absolute positions
+- The last element got highest priority
+
+`FittedBox`: Scales and positions its child within itself according to fit.
+
+`Scaffold`: App backgroundColor
+
+`AppBar`: App bar
+
+### User input
+
+`FloatingActionButton`
+
+`TextField`
+- decoration
+  - border, hintText(placeholder)
