@@ -38,8 +38,6 @@ Command | Starting State | Action
 
 ### Core Distinctions
 
-#### asldfslkda
-
 > **Pro Tip:** Use `docker run` for new instances and `docker start` to resume work on an existing container to preserve file changes not saved in a volume.
 
 
@@ -91,6 +89,8 @@ docker run -d -p 49161:1521 -p 5000:8080 -v db-vol:/opt/oracle/oradata oracleina
 
 `docker system prune`: Removes all stopped containers, unused networks, and dangling images.
 
+## Dockerfile
+
 ### Dockerfile
 
 Instructions for Docker to build an image
@@ -115,9 +115,15 @@ CMD ["/app/entrypoint.sh"]
 
 Let's break down this Dockerfile
 
-- `FROM`: Create a new build stage from a base image
+`FROM`: Create a new build stage from a base image
 
-- `COPY`:  Copy files and directories
+`COPY`:  Copy files and directories
+
+When you use `./`, you are telling Docker explicitly that the destination **must be a directory**.
+
+- With the slash `./`: If the directory /app (your WORKDIR) somehow doesn't exist or there is an error, Docker knows you intended to put files inside a folder.
+
+- Without the slash `.`: If you were copying a **single file** and the destination didn't exist, Docker might rename your file to the name of the destination instead of putting it inside the folder.
 
 <CustomImage
   src="/images/notes/docker/copy.png"
@@ -127,29 +133,63 @@ Let's break down this Dockerfile
 
 <div className="grid not-prose grid-cols-1 md:grid-cols-2 gap-4">
   <CustomImage
-    src="/images/notes/docker/copy1.png"
-    width="1200"
-    height="700"
+    src="/images/notes/docker/copy-1.png"
+    width="595"
+    height="354"
   />
 
   <CustomImage
-    src="/images/notes/docker/copy2.png"
-    width="1200"
-    height="700"
+    src="/images/notes/docker/copy-2.png"
+    width="595"
+    height="354"
   />
 </div>
 
 
+`WORKDIR`: This just changes the directory
 
+`RUN`: Execute build commands.
 
-- `WORKDIR`: This just changes the directory
+`CMD`: Command to be executed when running a container from an image.
 
-- `RUN`: Execute build commands.
+### Run docker image
 
-- `CMD`: Command to be executed when running a container from an image.
+Run with .env file
 
+```docker run --env-file .env -p 3000:3000 your-image```
+
+### Tips
+
+- Use node:20-alpine for lightest weight and secure nodejs's dockerization
+
+- Most instructions in a Dockerfile (`RUN`, `COPY`, `ADD`) create a new, immutable layer
 
 
 ## Compose file
 
+### compose file
+
 Used to configure your Docker application’s services, networks, volumes, and more.
+
+`docker-compose.yaml`
+
+```dockerfile
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - NODE_ENV=development
+    env_file:
+      - .env.local
+    ports:
+      - "4000:4000"
+
+```
+
+Run compose
+
+```bash
+docker compose up
+```

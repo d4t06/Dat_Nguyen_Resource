@@ -306,6 +306,8 @@ void _onTapNavigate(BuildContext ct, int id) {
 
 ### Navigator
 
+
+
 `push()`: Adds a new route to the top of the stack.
 Use case: Standard forward navigation, allowing the user to return to the previous screen using the back button.
 - Example: `Navigator.push(context, MaterialPageRoute(builder: (context) => SecondRoute()),)`;.
@@ -366,6 +368,67 @@ class ProductController extends ChangeNotifier {
   }
 }
 ```
+## Theme
+
+[See more](https://docs.flutter.dev/cookbook/design/themes)
+
+Flutter applies styling in the following order:
+
+- Styles applied to the specific widget.
+- Themes that override the immediate parent theme.
+- Main theme for the entire app.
+
+
+After you define a `Theme`, Flutter's Material widgets use your theme to set the background colors and font styles for app bars, buttons, checkboxes, and more.
+
+```dart
+themeData(
+  useMaterial3: true,
+  colorScheme: ColorScheme.light(
+    onSurface: AppColors.textStrongLight,
+    brightness: Brightness.light,
+),
+```
+
+1. The Brand (Action Colors)
+
+| Property           | Purpose                                           | Website Equivalent                           |
+|--------------------|---------------------------------------------------|----------------------------------------------|
+| `primary`            | The main brand color for high-emphasis UI.        | Main Action Buttons (Submit, Login).         |
+| `onPrimary`          | Color for text/icons sitting on primary.          | White text on a blue "Submit" button.        |
+| `primaryContainer`   | A less intense version of primary.                | Background of a "Selected" menu item.        |
+| `onPrimaryContainer` | Color for text/icons sitting on primaryContainer. | Darker blue text on a light blue background. |
+
+2. Accent & Contrast (Variety)
+
+| Property    | Purpose                                         | Website Equivalent                                  |
+|-------------|-------------------------------------------------|-----------------------------------------------------|
+| `secondary`   | For less prominent UI components.               | Filter chips, toggle switches, or "Cancel" buttons. |
+| `onSecondary` | Color for text/icons sitting on secondary.      | Text inside a secondary chip.                       |
+| `tertiary`    | Used for contrasting accents or "neutralizing". | Highlighting a "New" badge or a "Sale" tag.         |
+| `onTertiary`  | Color for text/icons sitting on tertiary.       | Text inside that "Sale" tag.                        |
+
+3. Surface & Hierarchy (Backgrounds)
+
+| Property                  | Purpose                                     | Website Equivalent                                   |
+| ------------------------- | ------------------------------------------- | ---------------------------------------------------- |
+| `surface`                 | The main background of the app screens.     | The white or light grey body of the webpage.         |
+| `onSurface`               | The main text color (Highest emphasis).     | The Black body text you mentioned.                   |
+| `onSurfaceVariant`        | The secondary text color (Medium emphasis). | The Gray description text you mentioned.             |
+| `surfaceContainer`        | Background for cards and elevated areas.    | The white background of a product card.              |
+| `surfaceContainerHighest` | Highest elevation layer.                    | Input Field Backgrounds, Search Bars, Modal Dialogs. |
+| `outline`                 | Used for borders and dividers.              | Input field borders or horizontal lines.             |
+| `surfaceTint`             | A color overlay used to show elevation.     | Usually matches primary.                             |
+
+4. Feedback (Status)
+
+| Property         | Purpose                                    | Website Equivalent                        |
+|------------------|--------------------------------------------|-------------------------------------------|
+| `error`            | For invalid states or destructive actions. | "Delete" buttons or error messages.       |
+| `onError`          | Color for text/icons sitting on error.     | White text on a red error banner.         |
+| `errorContainer`   | Background for error messages.             | The light red background of an alert box. |
+| `onErrorContainer` | Text color for errorContainer.             | Dark red text on a light red box.         |
+
 ## Provider
 
 `prodivers/product_provider.dart`
