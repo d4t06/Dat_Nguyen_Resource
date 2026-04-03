@@ -392,33 +392,33 @@ themeData(
 
 1. The Brand (Action Colors)
 
-| Property           | Purpose                                           | Website Equivalent                           |
-|--------------------|---------------------------------------------------|----------------------------------------------|
-| `primary`            | The main brand color for high-emphasis UI.        | Main Action Buttons (Submit, Login).         |
-| `onPrimary`          | Color for text/icons sitting on primary.          | White text on a blue "Submit" button.        |
-| `primaryContainer`   | A less intense version of primary.                | Background of a "Selected" menu item.        |
-| `onPrimaryContainer` | Color for text/icons sitting on primaryContainer. | Darker blue text on a light blue background. |
+| Property             | Purpose                                                   | Website Equivalent                                |
+| -------------------- | --------------------------------------------------------- | ------------------------------------------------- |
+| `primary`            | The main brand color for high-emphasis UI.                | Main Buttons (Submit, Login).                     |
+| `onPrimary`          | Color for text/icons sitting on primary.                  | Text inside                                       |
+| `primaryContainer`   | Stand out more than the background but less than primary. | Selected list items, Hover states, active Tab BG. |
+| `onPrimaryContainer` | Color for text/icons                                      | Text inside.                                      |
 
 2. Accent & Contrast (Variety)
 
-| Property    | Purpose                                         | Website Equivalent                                  |
-|-------------|-------------------------------------------------|-----------------------------------------------------|
-| `secondary`   | For less prominent UI components.               | Filter chips, toggle switches, or "Cancel" buttons. |
-| `onSecondary` | Color for text/icons sitting on secondary.      | Text inside a secondary chip.                       |
+| Property      | Purpose                                         | Website Equivalent                                  |
+| ------------- | ----------------------------------------------- | --------------------------------------------------- |
+| `secondary`   | After primary                                   | Filter chips, toggle switches, or "Cancel" buttons. |
+| `onSecondary` | Color inside.                                   | Text inside a secondary chip.                       |
 | `tertiary`    | Used for contrasting accents or "neutralizing". | Highlighting a "New" badge or a "Sale" tag.         |
-| `onTertiary`  | Color for text/icons sitting on tertiary.       | Text inside that "Sale" tag.                        |
-
+| `onTertiary`  | Color inside.                                   | Text inside that "Sale" tag.                        |
 3. Surface & Hierarchy (Backgrounds)
 
-| Property                  | Purpose                                     | Website Equivalent                                   |
-| ------------------------- | ------------------------------------------- | ---------------------------------------------------- |
-| `surface`                 | The main background of the app screens.     | The white or light grey body of the webpage.         |
-| `onSurface`               | The main text color (Highest emphasis).     | The Black body text you mentioned.                   |
-| `onSurfaceVariant`        | The secondary text color (Medium emphasis). | The Gray description text you mentioned.             |
-| `surfaceContainer`        | Background for cards and elevated areas.    | The white background of a product card.              |
-| `surfaceContainerHighest` | Highest elevation layer.                    | Input Field Backgrounds, Search Bars, Modal Dialogs. |
-| `outline`                 | Used for borders and dividers.              | Input field borders or horizontal lines.             |
-| `surfaceTint`             | A color overlay used to show elevation.     | Usually matches primary.                             |
+| Property                  | Purpose                                 | Website Equivalent                                   |
+| ------------------------- | --------------------------------------- | ---------------------------------------------------- |
+| `surface`                 | Screen bg.                              | Page bg.                                             |
+| `onSurface`               | .                                       | The body text.                                       |
+| `onSurfaceVariant`        | .                                       | Description Text, Helper text, Hint text.            |
+| `surfaceContainer`        | Background for cards.                   | The white background of a product card.              |
+| `surfaceContainerLow`     | Low.                                    | Sidebars, Footers, or subtle backgrounds.            |
+| `surfaceContainerHighest` | Highest.                                | Input Field Backgrounds, Search Bars, Modal Dialogs. |
+| `outline`                 | Used for borders and dividers.          | Input field borders or horizontal lines.             |
+| `surfaceTint`             | A color overlay used to show elevation. | Usually matches primary.                             |
 
 4. Feedback (Status)
 
@@ -428,6 +428,50 @@ themeData(
 | `onError`          | Color for text/icons sitting on error.     | White text on a red error banner.         |
 | `errorContainer`   | Background for error messages.             | The light red background of an alert box. |
 | `onErrorContainer` | Text color for errorContainer.             | Dark red text on a light red box.         |
+
+```dart
+return ColorScheme(
+  brightness: brightness,
+  primary: AppColors.primary,
+  onPrimary: AppColors.onPrimary,
+  secondary: AppColors.secondary,
+  onSecondary: AppColors.onSecondary,
+  surface: brightness == Brightness.light
+      ? AppColors.lightSurface
+      : AppColors.darkSurface
+  ...
+)
+```
+
+## Localization
+
+<details>
+  <summary>Video</summary>
+  <Video id="WrqH5fF2ZuY" />
+</details>
+
+Add 'l10n.yaml'
+
+```yaml
+arb-dir: lib/l10n
+template-arb-file: app_en.arb
+output-localization-file: app_localizations.dart
+output-class: AppLocalizations
+```
+
+Enable Automatic Generation
+
+```yaml
+flutter:
+  generate: true
+```
+
+Or manual generation
+
+```bash
+flutter gen-l10n
+```
+
 
 ## Provider
 
@@ -495,6 +539,10 @@ The easiest way to read a value is by using the extension methods on [BuildConte
 One can also use the static method `Provider.of<T>(context)`, which will behave similarly to `watch`. When the `listen` parameter is set to false (as in `Provider.of<T>(context, listen: false))`, then it will behave similarly to `read`.
 
 It's worth noting that `context.read<T>()` won't make a widget rebuild when the value changes and it cannot be called inside `StatelessWidget.build/State.build`. On the other hand, it can be freely called outside of these methods.
+
+## Dependency Injection
+
+
 
 ## Widgets
 

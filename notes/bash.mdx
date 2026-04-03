@@ -59,6 +59,15 @@ place fonts at ~/.local/share/fonts
 
 Extract and move app folde to /opt
 
+```bash
+sudo tar -xvf postman-linux-x64.tar.gz -C /opt/
+````
+
+- `x`: Extract
+- `v`: Verbose mode
+- `f`: Specific file name
+- `C`: To specific folder
+
 Create app.desktop at /usr/share/applications
 
 ```
@@ -69,6 +78,12 @@ Exec=/opt/firefox/firefox %u
 Icon=/opt/firefox/browser/chrome/icons/default/default128.png
 Terminal=false
 Type=Application
+```
+Create Symbolic Link: Create a link to run postman from the terminal:
+
+```
+sudo ln -s /opt/app /usr/local/bin/app
+
 ```
 
 **Install nodejs**

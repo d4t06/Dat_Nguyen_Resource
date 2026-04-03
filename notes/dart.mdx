@@ -110,104 +110,12 @@ Map<String, int> inventory = {
 print(inventory['cakes']);
 ```
 
-### final and const
-
-`final`
-
-Runtime: When you fetch data, you don't know what type of returned data is and you want to prevent the variable from being reassigned to a different map
-
-```dart
-
-// The variable 'userData' cannot point to a new map, but we can change its contents.
-final userData = await fetchUserFromApi(); 
-
-userData['lastLogin'] = DateTime.now().toString(); // This is allowed.
-
-// userData = {}; // This is NOT allowed (reassignment error).
-
-```
-
-`const`
-
-Compile-time: Before the app even runs.
-
-``` dart
-const time = DateTime.now(); ❌
-```
-
-```dart
- 
-// The entire map is "frozen" and cannot be modified.
-const rolePermissions = {
-  'admin': 'full_access',
-  'user': 'read_only',
-};
-
-// rolePermissions['guest'] = 'none'; // This would throw a runtime error!
-
-```
-
 ### String interpolation
 
 ```dart
 print("my name is $name");
 print("my name is ${person.name}");
 ```
-
-### Null safety
-
-By default, all variables in Dart are non-nullable.
-
-```dart
-int? age; // 'age' can be int or null
-
-int? nullableAge = 30;
-int nonNullableAge = nullableAge!; // Null Assertion
-
-String? name;
-String user = name 	 'Guest'; // If 'name' is null, use 'Guest'
-
-String? name;
-int? length = name?.length; // Avoid runtime error
-
-```
-
-**Local Shadowing**
-
-```dart 
-Product? product;
-if (product != null) {
-  return Text(product!.name); // The '!' forces it to be non-nullable
-}
-
-
-Product product = Product.blank();
-// Now you can use 'product' without '!'
-return Text(product.name); 
-```
-
-
-### Cascade
-
-Allows you to perform a sequence of operations (method calls, property settings) on the same object without repeatedly typing the object's name
-
-```dart
-var paint = Paint();
-paint.color = Colors.black;
-paint.strokeCap = StrokeCap.round;
-paint.strokeWidth = 5.0;
-```
-
-Using cascade
-
-```dart
-var paint = Paint()
-  ..color = Colors.black
-  ..strokeCap = StrokeCap.round
-  ..strokeWidth = 5.0;
-```
-
-
 ### Function
 
 ```dart
@@ -295,17 +203,6 @@ class Book {
 }
 ```
 
-
-### Name constuctor
-
-```dart
-// Default, unnamed constructor
-Person(this.name, this.age);
-
-// Named constructor for a guest user
-Person.guest() : name = 'Guest', age = 0;
-```
-
 ### Fetching data
 
 ```dart
@@ -321,3 +218,277 @@ if (response.statusCode == 200) {
   print('Request failed with status: ${response.statusCode}.');
 }
 ```
+
+
+## Special operator
+
+
+**Cascade** `..`
+
+Allows you to perform a sequence of operations (method calls, property settings) on the same object without repeatedly typing the object's name
+
+```dart
+var paint = Paint();
+paint.color = Colors.black;
+paint.strokeCap = StrokeCap.round;
+paint.strokeWidth = 5.0;
+```
+
+Using cascade
+
+```dart
+var paint = Paint()
+  ..color = Colors.black
+  ..strokeCap = StrokeCap.round
+  ..strokeWidth = 5.0;
+```
+
+
+## Null safety
+
+`late int x`: Non-nullable, can be initialized later, but must be set before use.
+
+`int? x`: Nullable, initialized to null by default if no value is provided
+
+
+By default, all variables in Dart are non-nullable.
+
+```dart
+int? age; // 'age' can be int or null
+
+int? nullableAge = 30;
+int nonNullableAge = nullableAge!; // Null Assertion
+
+String? name;
+String user = name 	 'Guest'; // If 'name' is null, use 'Guest'
+
+String? name;
+int? length = name?.length; // Avoid runtime error
+
+```
+
+**Local Shadowing**
+
+```dart 
+Product? product;
+if (product != null) {
+  return Text(product!.name); // The '!' forces it to be non-nullable
+}
+
+
+Product product = Product.blank();
+// Now you can use 'product' without '!'
+return Text(product.name); 
+```
+
+
+
+
+## final and const
+
+`final`
+
+Runtime: When you fetch data, you don't know what type of returned data is and you want to prevent the variable from being reassigned to a different map
+
+```dart
+
+// The variable 'userData' cannot point to a new map, but we can change its contents.
+final userData = await fetchUserFromApi(); 
+
+userData['lastLogin'] = DateTime.now().toString(); // This is allowed.
+
+// userData = {}; // This is NOT allowed (reassignment error).
+
+```
+
+`const`
+
+Compile-time: Before the app even runs.
+
+``` dart
+const time = DateTime.now(); ❌
+```
+
+```dart
+ 
+// The entire map is "frozen" and cannot be modified.
+const rolePermissions = {
+  'admin': 'full_access',
+  'user': 'read_only',
+};
+
+// rolePermissions['guest'] = 'none'; // This would throw a runtime error!
+
+```
+
+## Class
+
+### get, set
+
+```dart
+// arrow syntax
+String get name => _name;
+
+// block syntax
+String get upperName {
+  return _name.toUpperCase();
+}
+```
+
+
+### Mutability and Memory
+
+Dart is **Library-level privacy scope**, that mean code inside the same .dart file can see private field.
+
+```dart
+String? _name;
+Test(this._name);
+// Mutable: ✅ my_test._name = 'hehe';
+// Memory: Create new instance every time call Test()
+```
+
+```dart
+final String? _name;
+Test(this._name);
+// Mutable: ❌
+// Memory: Create new instance every time call Test()
+```
+
+```dart
+final String? _name;
+const Test(this._name);
+// Mutable: ❌
+// Memory: If you create const Test('A') in five different places
+// Dart will only create one single object
+
+// ❌
+// String? _name;
+// const Test(this._name); const constructor require final fields
+```
+
+### Constuctor
+
+```dart
+// Default constructor
+Person(this._name, this._age);
+// Same as
+Person(String name, int age) : _name = name, _age = age;
+
+// Named constructor for a guest user
+Person.guest() : _name = 'Guest', _age = 0;
+
+String? _name;
+Test({this._name}); // ❌ Can't use a private field in a named parameter constructor.
+
+String? name;
+Test({this.name}); //✅
+
+String? _name;
+Test({String? name}) : _name = name; // ✅
+
+String? _name;
+Test(this._name); // ✅
+
+
+```
+
+**Named parameters option by default**
+
+```dart
+Class Test {
+	String _name;	
+
+	Test({String name}); // ❌ Can't do it, Name is type of String but named parameters is optional
+
+	Test({required String name}); // ✅
+	Test(String name); // ✅
+}
+
+
+Test(); // ✅ Valid if Named parameters
+```
+**Factory constructor**
+
+Unlike a standard (generative) constructor, which always creates a new instance of the class Factory can:
+
+- Returns the existing or new instance
+- Include complex logic
+
+With specific rules
+
+- Must return instance
+- Can't access `this`
+- Can't use initializer lists
+
+At a glance, a `factory` constructor looks like a `static` method at can't access `this`, to return object they must either:
+
+- Something already existing (like static variable)
+
+- Something new from from scratch
+
+In short: A factory acts like a static method but is called like a constructor
+
+```dart
+
+// ❌ Error: Factory constructors cannot have initializer lists
+// factory Point.atOrigin() : x = 0, y = 0 { ... }
+
+// ✅ Correct: Use the factory to call a generative constructor
+factory Point.atOrigin() {
+  return Point(0, 0);
+}
+
+// Most use case
+factory Product.fromJson() {
+	return Product(...);
+}
+
+Product.fromJson(res.data);
+```
+**A named parameter private constructor with an initializer list and a constructor body.**
+
+```dart
+ Test._({required String name}) : _name = name {
+    print(">>> Private constructor called with name: $name");
+  }
+````
+**A constructor call another constructor**
+
+```dart
+Test.forwardToBlank() : this.blank();
+```
+
+### Way to instantiate
+
+Global define
+
+```dart
+final dio = Dio(_options);
+// Singleton
+```
+Static field
+```dart
+static final dio = Dio(_options);
+// Singleton
+```
+Instance Field
+```dart
+final dio = Dio(_options);
+// A new Dio instance is created every time create a object.
+```
+Instance Method (Factory-like)
+```dart
+Dio getDio() {
+  return Dio(_options);
+}
+// A new Dio instance is created every time function called
+```
+As getter
+```dart
+static Dio get dio {
+  return Dio(_options);
+}
+// A new instance every time you access it.
+```
+
+
