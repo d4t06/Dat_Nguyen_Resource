@@ -323,6 +323,9 @@ const rolePermissions = {
 
 ## Class
 
+<mark>Dart is **Library-level privacy scope**, that mean code inside the same .dart file can see private field.</mark>
+
+
 ### get, set
 
 ```dart
@@ -337,8 +340,6 @@ String get upperName {
 
 
 ### Mutability and Memory
-
-Dart is **Library-level privacy scope**, that mean code inside the same .dart file can see private field.
 
 ```dart
 String? _name;
@@ -491,4 +492,140 @@ static Dio get dio {
 // A new instance every time you access it.
 ```
 
+## OOP
 
+
+
+
+### Keywords
+
+`extends` vs `implements` vs `with` keyword
+
+| Keyword        | Inheritance                           | Requirement                                   | Count             |
+|----------------|---------------------------------------|-----------------------------------------------|-------------------|
+| **extends**    | Inherits both API and implementation. | **Only need** to override `abstract` methods. | Exactly one.      |
+| **implements** | Inherits API only (no code).          | Must **override every member** of the target. | Multiple allowed. |
+| **with**       | Inherits implementation only.         | Generally use logic as-is from the mixin.     | Multiple allowed. |
+
+
+
+
+```dart
+abstract class Animal {
+  void eat() {}
+  void run() {}
+  void walk();
+}
+
+class Duck extends Animal {
+  @override
+  void walk() {}
+}
+
+class Dog implements Animal {
+  @override
+  void walk() {}
+  @override
+  void eat() {}
+  @override
+  void run() {}
+}
+```
+
+
+
+### Mixin
+
+`mixin` is a way to reuse code across multiple class hierarchies without using traditional inheritance
+
+```dart
+mixin Flyable {
+  void fly() => print("I'm flying!");
+}
+mixin Walkable {
+  void walk() => print("I can walk!");
+}
+
+// Applying multiple mixins using 'with'
+class Duck extends Animal with Flyable, Walkable {}
+
+void main() {
+  var duck = Duck();
+  duck.fly();  // Output: I can fly!
+  duck.walk(); // Output: I can walk!
+}
+```
+
+
+### Abstract
+
+**Normal Class**: All methods must have a body.
+
+**Abstract Class**: Can have methods with or without a body.
+
+```dart
+abstract class Animal {
+  void eat() => print("Eating..."); // Shared logic
+  void makeSound(); // Must be implemented
+}
+
+class Dog extends Animal {
+  @override
+  void makeSound() => print("Bark!");
+}
+```
+
+
+```dart
+class Animal {
+  void eat() => print('Eating...');
+}
+
+mixin Swimmer {
+  void swim() => print('Swimming...');
+}
+
+abstract class Flyer {
+  void fly();
+}
+
+// Extends one class, implements another (contract), and uses a mixin (code reuse)
+class Duck extends Animal with Swimmer implements Flyer {
+  @override
+  void fly() => print('Flapping wings...');
+}
+```
+
+`Abstract` vs `Interface`
+
+| Feature           | abstract class                                                         | interface class                                                                            |
+|-------------------|------------------------------------------------------------------------|--------------------------------------------------------------------------------------------|
+| **Instantiation** | **Cannot** be instantiated.                                                | Can be instantiated (unless also marked `abstract`).                                       |
+| **Inheritance**   | Can using `extends` or  `implements`. | With different file **only** `implements`                                                     |
+| **Method Bodies** | Can have both concrete and abstract methods.                           | Must have concrete bodies for all methods if it's not abstract. (abstract interface class) |
+
+
+**I want to define a class that can i **implements** later, what type of class should i use ?**
+
+**abstract class**
+
+Why:
+- It prevents anyone from creating an instance of the class (no Animal()), allows methods without bodies.
+- Can both `extends` and `implements`.
+
+**interface class**
+
+Why: 
+- It allows the class to be used as a normal class, but prevents people buidling a child (extends) outside your file.
+- Your interface some default code, but users need implements it if they want to create their own version.
+
+
+**I want to define a class that can i `extends` later, what type of class should i use ?**
+
+**normal class**
+
+Why: It allows full inheritance of all methods and variables.
+
+**abstract class**
+
+Why: same as implements

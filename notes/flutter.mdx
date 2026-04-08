@@ -42,10 +42,18 @@ Use command-line tool **sdkmanager** to download **platforms** and **build-tools
 
 flutter config --android-sdk
 
-
 Install linux tool 
 ```
 dnf install clang cmake ninja-build gtk3-devel mesa-demos
+```
+
+The output confirms that you have the OpenJDK Runtime Environment (JRE) installed, but not the Java Development Kit (JDK).
+
+The openjdk-21-jre package (which you have) provides the java command to run apps, but openjdk-21-jdk is a separate package that adds the javac command and other development tools. Build tools like Gradle specifically look for the JDK to handle the `compileDebugJavaWithJavac` task
+
+Install the Compiler (JDK)
+```bash
+sudo apt install openjdk-21-jdk
 ```
 
 ### Linux native support
@@ -104,7 +112,34 @@ However, there are a few "hidden" differences to keep in mind:
 
 ```bash
 flutter create my_project
+
+
+# build debug apk for develop
+flutter build apk --debug
+
+
+# install to the phone
+adb install -r build/app/outputs/flutter-apk/app-debug.apk
+
+# open app on phone and start develop
+flutter attach
+
+
+# OR
+# run with existing apk
+flutter run --use-application-binary=build/app/outputs/flutter-apk/app-debug.apk
 ```
+
+**When you ONLY need Hot Reload (No Build needed):**
+- **UI/Widgets (Colors**, Padding, Layouts).
+- **Logic** (Functions, Calculations).
+- **State** (How data flows).
+
+**When you MUST Build again (Hot Reload won't work):**
+- **Plugins/Dependencies**: Adding a new package to pubspec.yaml.
+- **Native Code**: Modifying files in the android/ or ios/ folders (like permissions in AndroidManifest.xml).
+- **Assets**: Adding new images or fonts.
+- **App Crashes**: Sometimes a "Hot Restart" (Shift + R) can't recover the app's memory, and a fresh install is cleaner.
 
 Simple flutter app
 
@@ -211,7 +246,7 @@ MaterialApp(
   ),
   home: MyHomePage(),
 );
-``` 
+```
 
 
 ### File content structure
@@ -443,6 +478,41 @@ return ColorScheme(
 )
 ```
 
+**Theme tip**
+
+Defaul `Text()` style is bodyMedium
+
+```dart
+extension TailwindTypography on TextStyle {
+  TextStyle get bold => copyWith(fontWeight: FontWeight.w700);
+
+  TextStyle get textLg => copyWith(fontSize: 18, height: 1.555);
+}
+
+extension ThemeContext on BuildContext {
+  // Shortcut to the full theme
+  ThemeData get theme => Theme.of(this);
+
+  // Shortcut to the color scheme
+  ColorScheme get colorScheme => theme.colorScheme;
+
+  // Use bodyMedium as the base
+  TextStyle get textLg => theme.textTheme.bodyMedium!.textLg;
+}
+
+```
+Use in app
+
+```dart
+Text(
+  item.role,
+  style: context.textLg.bold.copyWith(
+    color: context.colorScheme.primary,
+  ),
+)
+```
+
+
 ## Localization
 
 <details>
@@ -540,11 +610,134 @@ One can also use the static method `Provider.of<T>(context)`, which will behave 
 
 It's worth noting that `context.read<T>()` won't make a widget rebuild when the value changes and it cannot be called inside `StatelessWidget.build/State.build`. On the other hand, it can be freely called outside of these methods.
 
-## Dependency Injection
+## Riverpod
 
+| Layer                 | Role              | Logic                                          |
+|-----------------------|-------------------|------------------------------------------------|
+| Widget (View)         | UI / User Input   | Calls notifier.login()                         |
+| Notifier (Controller) | Application Logic | try/catch, updates isLoading, calls Repository |
+| Repository (Data)     | Data Source       | http.post, jsonDecode, throws Errors           |
+
+### Define a state
+
+```dart
+class LoginState {
+  final bool isFetching;
+  final String? errorMessage;
+
+  const LoginState({
+    this.isFetching = false,
+    this.errorMessage,
+  });
+
+  LoginState copyWith({
+    bool? isFetching,
+    String? errorMessage,
+  }) {
+    return LoginState(
+      isFetching: isFetching ?? this.isFetching,
+      errorMessage: errorMessage,
+    );
+  }
+}
+```
+
+### Notifier
+
+In Riverpod, the Notifier is specifically designed to be the Controller. It is the single place where:
+
+- State is updated (Loading -> Success/Error).
+- Side effects happen (Calling the API).
+- Errors are handled (The try/catch).
+
+```dart
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tech_review/screens/login/logic/login_state.dart';
+
+
+class AuthRepository {
+  Future<User> signIn(String email, String password) async {
+    // Actual API implementation here
+  }
+}
+
+class LoginNotifier extends Notifier<LoginState> {
+  @override
+  LoginState build() => LoginState(); // Initial state
+
+  Future<void> login(String email, String password) async {
+    // Set loading to true while "calling" API
+    state = state.copyWith(isFetching: true, errorMessage: null);
+    try {
+      // Notifier calls the Repository
+      final user = await ref.read(authRepositoryProvider).signIn(email, password);
+      state = state.copyWith(isLoading: false, isLoggedIn: true);
+    } catch (e) {
+      state = state.copyWith(isLoading: false, errorMessage: e.toString());
+    }
+  }
+
+  void logout() {
+    state = LoginState(); // Reset state
+  }
+}
+
+// Global provider instance
+final loginProvider = NotifierProvider<LoginNotifier, LoginState>(() {
+  return LoginNotifier();
+});
+```
+
+### Use in UI
+
+```dart
+final loginState = ref.watch(loginProvider);
+
+// button
+onPressed: () => ref.read(loginProvider.notifier).login()
+```
+
+## Code generation
+
+```dart
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'user.freezed.dart';
+part 'user.g.dart'; // This is where json_serializable puts its code
+
+@freezed
+class User with _$User {
+  const factory User({
+    required String name,
+    required int age,
+  }) = _User;
+
+  // This tells Freezed to use json_serializable
+  factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
+}
+```
+
+| Package           | Purpose                                          | Generated File Extension |
+|-------------------|--------------------------------------------------|--------------------------|
+| build_runner      | The tool that runs the generation process.       | N/A                      |
+| freezed           | Creates immutable classes, copyWith, and unions. | .freezed.dart            |
+| json_serializable | Creates fromJson and toJson logic.               | .g.dart                  |
 
 
 ## Widgets
+
+### Basic
+
+`Row` doesn’t constrain children width, so the button not know how wide it should be 
+
+Inside a Row, always constrain width using:
+
+- `Expanded`: Same as `flex:1` (1 1 0),  behaves like a "proportion" setting. All items with flex: 1 take up equal width/height, regardless of content size, because they start from a basis of 0.
+
+- `Flexible`: Same as `flex:auto` (1 1 auto), behaves like a "size-to-content" setting. Items grow and shrink to fill the space, but their initial size is based on their content
+
+- `SizedBox`: Constraints with specific size
+
 
 ### Layout
 
