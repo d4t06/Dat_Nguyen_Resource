@@ -1,0 +1,138 @@
+---
+title: "Flutter"
+update: "4-7-2025"
+date: "24-3-2026"
+tags: ["Flutter"]
+image: "/images/notes/flutter.png"
+---
+
+
+
+## Linux native support
+
+**The "Pro" Workflow for Laptops**
+
+1. Develop on Linux Desktop (-d linux): Use this for 90% of your work (styling, navigation, logic). It’s the fastest way to iterate.
+
+2. Resize the Window: Manually shrink your Linux app window to a "phone shape" to check your layout.
+
+3.Final Check on Phone (-d android): Once a feature is done, run it on your physical phone via USB/Scrcpy to test touch feel and performance.z
+
+## Best practices
+
+1. Keep widget single responsibility, separate ui from logic
+
+2. Keep widget short, 200 lines of code is the best
+
+3. snake_case naming
+
+4. Follow flutter flutter repository
+
+5. Folder structure, DDD
+
+6. Start your code with ci/cd in mind
+
+7. Not hard code style in to widget
+
+8. Use `const` when ever possible
+
+## Practive
+
+### Handle loading state
+
+**Overlay** method
+
+```dart
+Stack(
+  children: [
+    if (!appLoading) _pageContent(homeState),
+
+    // The loading overlay
+    if (appLoading)
+      Container(
+        color: Colors.white,
+        child: const Center(child: CircularProgressIndicator()),
+      ),
+  ],
+),
+```
+
+**AppAsyncValueView**
+
+```dart
+// app_async_value_view.dart
+
+final AsyncValue<T> value;
+final Widget Function(T data) data;
+final VoidCallback? onRetry;
+
+@override
+Widget build(BuildContext context) {
+  return value.when(
+    loading: () => Center(child: Text('Loading')),
+    error: (error, stackTrace) => Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text("Error"),
+          const SizedBox(height: 12),
+          if (onRetry != null)
+            OutlinedButton(onPressed: onRetry, child: Text("Retry")),
+        ],
+      ),
+    ),
+    data: data,
+  );
+}
+```
+
+```dart
+// home_state.dart
+@freezed
+abstract class HomeState with _$HomeState {
+  const factory HomeState({
+    // @Default([]) List<ProductList> products,
+    @Default(AsyncValue.loading()) AsyncValue<List<ProductList>> products,
+    @Default([]) List<ProductList> searchResults,
+
+    @Default(false) bool isSearch,
+    @Default(false) bool isLoading,
+  }) = _HomeState;
+}
+```
+
+```dart
+// home_controller.dart
+@riverpod
+class HomeController extends _$HomeController {
+  late final Dio _dio;
+
+  @override
+  HomeState build() {
+    _dio = ref.watch(dioProvider);
+    return HomeState();
+  }
+
+  Future<List<ProductList>> callGetProducts() async {
+    final res = await _dio.get('/products?page=1');
+
+    final GetProductsResponse payload = GetProductsResponse.fromJson(res.data);
+
+    return payload.products;
+  }
+
+  Future<void> fetchProducts() async {
+    state = state.copyWith(products: const AsyncValue.loading());
+
+    state = state.copyWith(
+      products: await AsyncValue.guard(() async {
+        return await callGetProducts();
+      }),
+    );
+  }
+}
+```
+
+```dart
+// home_screen.dart
+```

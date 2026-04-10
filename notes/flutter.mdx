@@ -56,56 +56,6 @@ Install the Compiler (JDK)
 sudo apt install openjdk-21-jdk
 ```
 
-### Linux native support
-
-Flutter works almost exactly the same on a Linux window as it does on an Android phone. Since Flutter draws its own pixels using the Impeller/Skia engine, the buttons, colors, and animations you see on Linux will look identical on Android.
-
-However, there are a few "hidden" differences to keep in mind:
-
-**What is the "Same"?**
-
--	UI Layout: If it fits on a Linux window resized to phone dimensions, it will fit on the phone.
-
--	Business Logic: Your math, API calls (HTTP), and data processing code will behave identically.
-
--	Hot Reload: You get the same instant updates on Linux as you do on the phone.
-
-**What is "Different"?**
-
-- Screen Density (DPI): A "pixel" on your laptop monitor is much larger than a pixel on a high-res phone screen. Text might look crisp on your laptop but tiny or different on the phone.
-
-- Touch vs. Mouse: Linux uses a mouse cursor (hover effects work); Android uses touch (no hover, has gestures like long-press).
-
-- System APIs: Code for the Camera, GPS, Bluetooth, or Notifications will crash or do nothing on Linux unless you write specific desktop code for them.
-
-- File Paths: Saving a file to /home/user/documents on Linux won't work on Android's sandboxed filesystem. Use the path_provider plugin to handle this automatically for both.
-
-**The "Pro" Workflow for Laptops**
-
-1. Develop on Linux Desktop (-d linux): Use this for 90% of your work (styling, navigation, logic). It’s the fastest way to iterate.
-
-2. Resize the Window: Manually shrink your Linux app window to a "phone shape" to check your layout.
-
-3.Final Check on Phone (-d android): Once a feature is done, run it on your physical phone via USB/Scrcpy to test touch feel and performance.z
-
-## Best practices
-
-1. Keep widget single responsibility, separate ui from logic
-
-2. Keep widget short, 200 lines of code is the best
-
-3. snake_case naming
-
-4. Follow flutter flutter repository
-
-5. Folder structure, DDD
-
-6. Start your code with ci/cd in mind
-
-7. Not hard code style in to widget
-
-8. Use `const` when ever possible
-
 ## Basic
 
 ### Init
@@ -542,8 +492,9 @@ Or manual generation
 flutter gen-l10n
 ```
 
-
 ## Provider
+
+Flutter built-in
 
 `prodivers/product_provider.dart`
 
@@ -612,37 +563,62 @@ It's worth noting that `context.read<T>()` won't make a widget rebuild when the 
 
 ## Riverpod
 
-| Layer                 | Role              | Logic                                          |
-|-----------------------|-------------------|------------------------------------------------|
-| Widget (View)         | UI / User Input   | Calls notifier.login()                         |
-| Notifier (Controller) | Application Logic | try/catch, updates isLoading, calls Repository |
-| Repository (Data)     | Data Source       | http.post, jsonDecode, throws Errors           |
+Base flutter project 2026
 
-### Define a state
+### ProviderScope
 
 ```dart
-class LoginState {
-  final bool isFetching;
-  final String? errorMessage;
-
-  const LoginState({
-    this.isFetching = false,
-    this.errorMessage,
-  });
-
-  LoginState copyWith({
-    bool? isFetching,
-    String? errorMessage,
-  }) {
-    return LoginState(
-      isFetching: isFetching ?? this.isFetching,
-      errorMessage: errorMessage,
-    );
-  }
+// app.dart
+void main() {
+  runApp(
+    const ProviderScope(
+      child: MyApp(),
+    ),
+  );
 }
 ```
 
-### Notifier
+### Providers
+
+**Provider**
+
+Used for values or objects that don't change
+
+Expose a read-only value.
+
+```dart
+final dioProvider = Provider<Dio>((ref) {
+  return Dio(BaseOptions(baseUrl: 'https://api.example.com'));
+});
+
+// Usage: ref.read(dioProvider).get();
+```
+
+**StateProvider** (Legacy)
+
+Can read/ write value.
+
+```dart
+final themeProvider = StateProvider<ThemeMode>((ref) => ThemeMode.light);
+
+// Usage: ref.read(themeProvider.notifier).state = ThemeMode.dark;
+```
+
+**FutureProvider**
+
+Handles the three states of an asynchronous request: Data, Loading, and Error.
+
+Expose a read-only value.
+
+```dart
+final userProfileProvider = FutureProvider<Map<String, dynamic>>((ref) async {
+  final dio = ref.watch(dioProvider);
+  final response = await dio.get('/user/info');
+  return response.data;
+});
+```
+
+**NotifierProvider**
 
 In Riverpod, the Notifier is specifically designed to be the Controller. It is the single place where:
 
@@ -688,40 +664,253 @@ final loginProvider = NotifierProvider<LoginNotifier, LoginState>(() {
 });
 ```
 
-### Use in UI
+**AsyncNotifierProvider**
+
+Method can be return type of Future
 
 ```dart
-final loginState = ref.watch(loginProvider);
+class ProductListNotifier extends AsyncNotifier<List<String>> {
+  @override
+  FutureOr<List<String>> build() async {
+    // 1. You can access other providers here using 'ref'
+    // 2. Perform your initial API call
+    return _fetchProducts();
+  }
 
-// button
-onPressed: () => ref.read(loginProvider.notifier).login()
+  // Private method to simulate an API call
+  Future<List<String>> _fetchProducts() async {
+    await Future.delayed(const Duration(seconds: 2)); // Simulate network lag
+    return ['Laptop', 'Smartphone', 'Monitor'];
+  }
+}
+
+
+final productListProvider = AsyncNotifierProvider<ProductListNotifier, List<String>>(() {
+  return ProductListNotifier();
+});
 ```
 
-## Code generation
+### Ref
+
+The Ref is the "bridge" that allows providers and widgets to interact with other providers.
+
+- WidgetRef: Used inside widgets to read or watch providers.
+- ProviderRef: Used inside a provider to access other providers.
+
+**WidgetRef**
+
+
+**ProviderRef**
+
+### Reading State
+
+There are two main ussage:
+
+- `ref.watch(provider)`: Used inside the build method. It observes the provider and triggers a rebuild of the widget whenever the state changes.
+
+- `ref.read(provider)`: Used inside callbacks (like onPressed). It gets the current value of a provider once without tracking future changes. Never use this inside the build method.
+
+
+### Modifiers
+
+To change how a provider behaves:
+
+- `.autoDispose`: Automatically destroys the state of a provider when it is no longer being used (e.g., the user leaves the screen). This is excellent for saving memory.
+
+- `.family`: Allows you to pass external parameters to a provider (e.g., fetching a specific user by an ID).
+
+
+| Layer                 | Role              | Logic                                          |
+|-----------------------|-------------------|------------------------------------------------|
+| Widget (View)         | UI / User Input   | Calls notifier.login()                         |
+| Notifier (Controller) | Application Logic | try/catch, updates isLoading, calls Repository |
+| Repository (Data)     | Data Source       | http.post, jsonDecode, throws Errors           |
+
+### Define a state
 
 ```dart
-import 'package:freezed_annotation/freezed_annotation.dart';
+class LoginState {
+  final bool isFetching;
+  final String? errorMessage;
 
-part 'user.freezed.dart';
-part 'user.g.dart'; // This is where json_serializable puts its code
+  const LoginState({
+    this.isFetching = false,
+    this.errorMessage,
+  });
 
-@freezed
-class User with _$User {
-  const factory User({
-    required String name,
-    required int age,
-  }) = _User;
-
-  // This tells Freezed to use json_serializable
-  factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
+  LoginState copyWith({
+    bool? isFetching,
+    String? errorMessage,
+  }) {
+    return LoginState(
+      isFetching: isFetching ?? this.isFetching,
+      errorMessage: errorMessage,
+    );
+  }
 }
 ```
 
-| Package           | Purpose                                          | Generated File Extension |
-|-------------------|--------------------------------------------------|--------------------------|
-| build_runner      | The tool that runs the generation process.       | N/A                      |
-| freezed           | Creates immutable classes, copyWith, and unions. | .freezed.dart            |
-| json_serializable | Creates fromJson and toJson logic.               | .g.dart                  |
+### Riverpod annotaion
+
+**Functional Providers**
+
+Using `Provider`, `FutureProvider`, so they are read-Only
+
+
+**Class-Based Providers (Managed State)**
+
+Using `Notifier` or `AsyncNotifier`
+
+Has state and expose public methods to change that state.
+
+
+<table style={{tableLayout: "fixed"}}>
+    <thead>
+        <tr>
+            <th style={{width: '15%'}}>Type</th>
+            <th>**Functional** <br/> (Can't perform side-effects)</th>
+            <th>**Class-Based** <br/> (Can perform side-effects)</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>**Sync**</td>
+            <td>
+                
+                  ```dart 
+                  @riverpod
+                  String example(Ref ref) {
+                    return 'foo'; 
+                  }
+                  ```
+            </td>
+            <td>
+                    ```dart
+                    @riverpod 
+                    class Example extends _$Example { 
+                      @override String build() {
+                        return 'foo'; 
+                      } 
+
+                      //Add methods to mutate the state
+                    }
+                    ```
+            </td>
+        </tr>
+
+        <tr>
+            <td>**Async - Future**</td>
+            <td>
+                
+                    ```dart
+                    @riverpod
+                    Future<String> example(Ref ref) async {
+                      return Future.value('foo');
+                    }                    
+                    ```
+            </td>
+            <td>
+                
+                    ```dart
+                    @riverpod
+                    class Example extends _$Example {
+                      @override
+                      Future<String> build() async {
+                        return Future.value('foo');
+                      }
+
+                      // Add methods to mutate the state
+                    }
+                    ```
+            </td>
+        </tr>
+        <tr>
+            <td>**Async - Stream**</td>
+            <td>
+                
+                    ```dart
+                    @riverpod
+                    Stream<String> example(Ref ref) async* {
+                      yield 'foo';
+                    }
+                    ```
+            </td>
+            <td>
+                
+                    ```dart
+                    @riverpod
+                    class Example extends _$Example {
+                      @override
+                      Stream<String> build() async* {
+                        yield 'foo';
+                      }
+
+                      // Add methods to mutate the state
+                    }
+                    ```
+            </td>
+        </tr>
+        
+    </tbody>
+</table>
+
+
+## Code generation
+
+Example model define with auto generate immutable classes and from/ to json logic.
+
+```dart
+part 'tag.freezed.dart';
+part 'tag.g.dart';
+
+Tag tagFromJson(String str) => Tag.fromJson(json.decode(str));
+
+String tagToJson(Tag data) => json.encode(data.toJson());
+
+@freezed // From freezed_annotation
+class Tag with _$Tag {
+    const factory Tag({
+        @JsonKey(name: "id")
+        required int id,
+        @JsonKey(name: "category_id") // From json_annotation
+        required int categoryId,
+        @JsonKey(name: "name")
+        required String name,
+    }) = _Tag;
+
+    factory Tag.fromJson(Map<String, dynamic> json) => _$TagFromJson(json);
+}
+```
+
+Break thought:
+
+- `build_runner`: The tool that runs the generation process.
+- `freezed`: Creates immutable classes, copyWith, etc.
+- `json_serializable`: Creates fromJson and toJson logic.
+- `json_annotation`: Correct naming conventions, dart use camelCase, api use snake_case.
+
+
+### Build_runner
+
+|       | Action               | Speed (after start) | Terminate?      |
+|-------|----------------------|---------------------|-----------------|
+| watch | Reacts to file saves | Fast (1-3s)         | No (stays open) |
+| build | Runs once            | Slow (30s+)         | Yes             |
+| clean | Deletes build cache  | Instant             | Yes             |
+
+
+Delete generated files
+
+```dart
+find . -name "*.g.dart" -type f -delete
+```
+
+Add to ~/.bashrc
+
+```bash
+alias brb="dart run build_runner build --delete-conflicting-outputs"
+alias brw="dart run build_runner watch --delete-conflicting-outputs"
+```
 
 
 ## Widgets
