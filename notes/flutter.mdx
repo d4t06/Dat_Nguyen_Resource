@@ -58,27 +58,50 @@ sudo apt install openjdk-21-jdk
 
 ## Basic
 
-### Init
+### CLI
+
 
 ```bash
+# Init project
 flutter create my_project
 
+# Create APK
+flutter build apk --debug # For development (hot reload support...)
+flutter build apk --release # For release
 
-# build debug apk for develop
-flutter build apk --debug
-
-
-# install to the phone
+# Install with ADB
 adb install -r build/app/outputs/flutter-apk/app-debug.apk
 
-# open app on phone and start develop
+# Run
 flutter attach
-
-
-# OR
-# run with existing apk
+# or
 flutter run --use-application-binary=build/app/outputs/flutter-apk/app-debug.apk
 ```
+
+**Gradle**
+
+```bash
+# Gradle keeps a background process (the Daemon) running even after your build finishes.
+# It keep the next build faster.
+./gradlew --stop
+
+./gradlew clean
+```
+
+Use `clean` only when you get a weird Android error that won't go away.
+
+Use `--stop` when you are done building for the day (or session) to give your Fedora OS its RAM back.
+
+**scrcpy**
+
+```bash
+scrcpy -m 1024 -b 2M --max-fps 30 --no-audio
+```
+
+- `-m 1024`: Max width
+- `-b 2M`: Bit rate
+- `--max-fps 30`: Max fps
+
 
 **When you ONLY need Hot Reload (No Build needed):**
 - **UI/Widgets (Colors**, Padding, Layouts).
@@ -91,42 +114,20 @@ flutter run --use-application-binary=build/app/outputs/flutter-apk/app-debug.apk
 - **Assets**: Adding new images or fonts.
 - **App Crashes**: Sometimes a "Hot Restart" (Shift + R) can't recover the app's memory, and a fresh install is cleaner.
 
-Simple flutter app
+### ~/.gradle/caches
 
-```dart
-void main() {
-  runApp(
-    MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text("My app"),
-          centerTitle: true,
-          backgroundColor: Colors.brown,
-          ),
-        body: Text("This is simple text"),
-        ),
-      
-    ),
-  ); 
-}
+What happens when remove it
 
-```
+- High CPU Usage: The next build will take 5–10 minutes as it re-indexes and re-compiles everything.
 
-To get hot reload work during development
+- Massive Download Time: Gradle will have to re-download every single dependency (Kotlin, Firebase, Support Libraries, etc.).
 
-```dart
-body: Home()
 
-...
-class Home extends StatelessWidget {
-  const Home({super.key});
+When you should remove it
 
-  @override
-  Widget build(BuildContext context) {
-    return const Text("Hi, there");
-  }
-}
-```
+- You see errors like Could not expand ZIP... or Unexpected end of ZLIB input stream.
+
+- You’ve already run flutter clean and ./gradlew clean and the build still fails.
 
 ### Lifecycle
 
@@ -853,6 +854,10 @@ Has state and expose public methods to change that state.
         
     </tbody>
 </table>
+
+### Lifecycle
+
+
 
 
 ## Code generation

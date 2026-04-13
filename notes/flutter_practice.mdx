@@ -40,7 +40,7 @@ image: "/images/notes/flutter.png"
 
 ### Handle loading state
 
-**Overlay** method
+**Overlay method**
 
 ```dart
 Stack(
@@ -136,3 +136,26 @@ class HomeController extends _$HomeController {
 ```dart
 // home_screen.dart
 ```
+
+### Riverpod in go_router
+
+```dart
+final routerProvider = Provider<GoRouter>((ref) {
+  final router = GoRouter(
+    initialLocation: '/',
+    redirect: (context, state) {
+      final auth = ref.read(authProvider);
+      ...
+    },
+  );
+
+  ref.listen(authProvider, (_, __) => router.refresh());
+
+  return router;
+});
+```
+
+Outside Redirect: Variables are static. They are evaluated once when the provider initializes.
+
+Inside Redirect: Logic is dynamic. It is evaluated every time the router checks the path.
+
