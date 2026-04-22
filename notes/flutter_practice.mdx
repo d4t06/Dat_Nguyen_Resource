@@ -159,3 +159,44 @@ Outside Redirect: Variables are static. They are evaluated once when the provide
 
 Inside Redirect: Logic is dynamic. It is evaluated every time the router checks the path.
 
+### Detail page
+
+```dart
+class ProductDetailScreen extends ConsumerStatefulWidget {
+  final String id;
+}
+
+class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
+  late String id;
+
+    @override
+  void initState() {
+    super.initState();
+
+    id = widget.id;
+  }
+}
+```
+
+### Init fetch data
+
+```dart title="page.dart"
+void initState() {
+  super.initState();
+  Future.microtask(() => ref.read(authProvider.notifier).init());
+}
+```
+
+```dart title="home_provider.dart"
+HomeState build() {
+  Future.microtask(() async {
+    await fetchMetadata();
+  });
+
+  return const HomeState();
+}
+```
+
+```dart
+
+```

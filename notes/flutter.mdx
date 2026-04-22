@@ -6,8 +6,6 @@ tags: ["Flutter"]
 image: "/images/notes/flutter.png"
 ---
 
-
-
 ## Great Videos
 
 <details>
@@ -43,7 +41,8 @@ Use command-line tool **sdkmanager** to download **platforms** and **build-tools
 flutter config --android-sdk
 
 Install linux tool 
-```
+
+```bash
 dnf install clang cmake ninja-build gtk3-devel mesa-demos
 ```
 
@@ -129,7 +128,7 @@ When you should remove it
 
 - You’ve already run flutter clean and ./gradlew clean and the build still fails.
 
-### Lifecycle
+### Widget lifecycle
 
 `initState()`: Called only once the widget is created
 
@@ -139,8 +138,7 @@ When you should remove it
  
 ### Custom component
 
-```dart
-
+```dart title="widgets/app_button.dart"
 class MyButton extends StatelessWidget {
 
   final Widget child;
@@ -164,9 +162,7 @@ MyButton(props: ButtonProps(Text("hehe"), onPress))
 
 Add font to `assets/fonts`
 
-Modify pubspec.yaml
-
-```yaml
+```yaml title="pubspec.yaml"
 flutter:
   fonts:
     - family: MyCustomFont
@@ -190,7 +186,7 @@ Text(
 
 Apply entire app
 
-```dart
+```dart title="app.dart"
 MaterialApp(
   theme: ThemeData(
     fontFamily: 'MyCustomFont',
@@ -214,6 +210,8 @@ Logic Handlers: Functions that update state (e.g., `_onLoginPressed()`).
 
 ### Route and navigate
 
+Built-in route generator
+
 **Basic push screen navigate**
 
 ```dart
@@ -227,44 +225,29 @@ void _onTapNavigate(BuildContext context, int id) {
 
 **Route generator**
 
-Create `route.dart`
-
-```dart
+```dart title="route.dart"
 const HOME_ROUTE = '/';
-const PRODUCT_DETAIL_ROUTE = '/product_detail';
 
 class RouterGenerator {
-
   static RouteFactory routes() {
     return (settings) {
       final  agrs = settings.arguments as Map<String, dynamic>;
-
-
       Widget screen;
-
       switch(settings.name) {
         case HOME_ROUTE:
           screen = Home();
-          break;
-        case PRODUCT_DETAIL_ROUTE:
-          screen = ProductDetail(agrs['id']);
           break;
         default:
          screen = NotFound();
       }
 
-
       return MaterialPageRoute(builder: (context) => screen);
-
     };
   }
-
 }
 ```
 
-app.dart
-
-```dart
+```dart title="app.dart"
 class App extends StatelessWidget {
   const App({super.key});
 
@@ -278,21 +261,16 @@ class App extends StatelessWidget {
 }
 ```
 
-Navigate
-
-```dart
+```dart title="page.dart"
 void _onTapNavigate(BuildContext ct, int id) {
   Navigator.pushNamed(ct, PRODUCT_DETAIL_ROUTE, arguments: {'id': id});
 }
 ```
 
-
 *MediaQuery.sizeOf(context)*: Rebuilds the widget only when the size property (width and height) changes.
 
 
-### Navigator
-
-
+**Navigator**
 
 `push()`: Adds a new route to the top of the stack.
 Use case: Standard forward navigation, allowing the user to return to the previous screen using the back button.
@@ -316,12 +294,26 @@ Use case: Clearing the entire navigation history, such as after logging out, and
 
 `popUntil()`: Removes routes from the top of the stack until a given predicate returns true 
 
+### Simple state management
 
-### Share state between widgets
+[Simple app state management](https://docs.flutter.dev/data-and-backend/state-mgmt/simple)
 
-`home.dart`
+```dart title="provider.dart"
+class ProductController extends ChangeNotifier {
+  bool _isLoading = true;
+  bool get isLoading => _isLoading;
 
-```dart
+  Future<void> getProducts() async {
+    this._isLoading = true;
+    notifyListeners();
+    ...
+  }
+}
+```
+
+**Import between page**
+
+```dart title="home.dart"
 class _HomeState extends State<Home> {
   final _controller = ProductController();
   ...
@@ -340,20 +332,56 @@ class _HomeState extends State<Home> {
 }
 ```
 
-`controller.dart`
+**Global use**
 
-```dart
-class ProductController extends ChangeNotifier {
-  bool _isLoading = true;
-  bool get isLoading => _isLoading;
-
-  Future<void> getProducts() async {
-    this._isLoading = true;
-    notifyListeners();
-    ...
-  }
+```dart title="main.dart"
+void main() {
+  runApp(
+    MultiProvider(
+      providers: [ChangeNotifierProvider(create: (_) => ProductProvider())],
+      child: const App(),
+    ),
+  );
 }
 ```
+
+```dart title="home.dart"
+return Consumer<CartModel>(
+  builder: (context, cart, child) {
+    return Text('Total price: ${cart.totalPrice}');
+  },
+);
+```
+
+The third argument is child, which is there for optimization. If you have a large widget subtree under your Consumer that doesn't change when the model changes, you can construct it once and get it through the builder.
+
+```dart title="home.dart"
+return Consumer<CartModel>(
+  builder: (context, cart, child) => Stack(
+    children: [
+      // Use SomeExpensiveWidget here, without rebuilding every time.
+      ?child,
+      Text('Total price: ${cart.totalPrice}'),
+    ],
+  ),
+  // Build the expensive widget here.
+  child: const SomeExpensiveWidget(),
+);
+```
+
+<mark>Put your Consumer widgets as deep in the tree as possible.</mark>
+
+The easiest way to read a value is by using the extension methods on [BuildContext]:
+
+- `context.watch<T>()`, which makes the widget listen to changes on T
+- `context.read<T>()`, which returns T without listening to it
+- `context.select<T, R>(R cb(T value))`, which allows a widget to listen to only a small part of T.
+
+One can also use the static method `Provider.of<T>(context)`, which will behave similarly to `watch`. When the `listen` parameter is set to false (as in `Provider.of<T>(context, listen: false))`, then it will behave similarly to `read`.
+
+It's worth noting that `context.read<T>()` won't make a widget rebuild when the value changes and it cannot be called inside `StatelessWidget.build/State.build`. On the other hand, it can be freely called outside of these methods.
+
+
 ## Theme
 
 [See more](https://docs.flutter.dev/cookbook/design/themes)
@@ -492,75 +520,6 @@ Or manual generation
 ```bash
 flutter gen-l10n
 ```
-
-## Provider
-
-Flutter built-in
-
-`prodivers/product_provider.dart`
-
-```dart
-class ProductProvider extends ChangeNotifier {
-  bool _isLoading = true;
-  bool get isLoading => _isLoading;
-
-  Future<void> getProducts() async {
-    this._isLoading = true;
-    notifyListeners();
-    ...
-  }
-}
-```
-
-`main.dart`
-
-```dart
-void main() {
-  runApp(
-    MultiProvider(
-      providers: [ChangeNotifierProvider(create: (_) => ProductProvider())],
-      child: const App(),
-    ),
-  );
-}
-```
-`Home.dart`, a consumer
-
-```dart
-return Consumer<CartModel>(
-  builder: (context, cart, child) {
-    return Text('Total price: ${cart.totalPrice}');
-  },
-);
-```
-
-The third argument is child, which is there for optimization. If you have a large widget subtree under your Consumer that doesn't change when the model changes, you can construct it once and get it through the builder.
-
-```dart
-return Consumer<CartModel>(
-  builder: (context, cart, child) => Stack(
-    children: [
-      // Use SomeExpensiveWidget here, without rebuilding every time.
-      ?child,
-      Text('Total price: ${cart.totalPrice}'),
-    ],
-  ),
-  // Build the expensive widget here.
-  child: const SomeExpensiveWidget(),
-);
-```
-
-<mark>Put your Consumer widgets as deep in the tree as possible.</mark>
-
-The easiest way to read a value is by using the extension methods on [BuildContext]:
-
-- `context.watch<T>()`, which makes the widget listen to changes on T
-- `context.read<T>()`, which returns T without listening to it
-- `context.select<T, R>(R cb(T value))`, which allows a widget to listen to only a small part of T.
-
-One can also use the static method `Provider.of<T>(context)`, which will behave similarly to `watch`. When the `listen` parameter is set to false (as in `Provider.of<T>(context, listen: false))`, then it will behave similarly to `read`.
-
-It's worth noting that `context.read<T>()` won't make a widget rebuild when the value changes and it cannot be called inside `StatelessWidget.build/State.build`. On the other hand, it can be freely called outside of these methods.
 
 ## Riverpod
 
@@ -710,7 +669,7 @@ There are two main ussage:
 - `ref.watch(provider)`: Used inside the build method. It observes the provider and triggers a rebuild of the widget whenever the state changes.
 
 - `ref.read(provider)`: Used inside callbacks (like onPressed). It gets the current value of a provider once without tracking future changes. Never use this inside the build method.
-
+1
 
 ### Modifiers
 
@@ -729,7 +688,7 @@ To change how a provider behaves:
 
 ### Define a state
 
-```dart
+```dart title="login_state.dart"
 class LoginState {
   final bool isFetching;
   final String? errorMessage;
@@ -855,21 +814,71 @@ Has state and expose public methods to change that state.
     </tbody>
 </table>
 
-### Lifecycle
+### Riverpod Lifecycle
 
+## Go Router
 
+```dart title="app_go_router.dart"
+enum AppRoute { login, root, home, splash, profile, productDetail }
 
+final goRouterProvider = Provider<GoRouter>((ref) {
+  final router = GoRouter(
+    initialLocation: '/splash',
+    redirect: {}
+    routes: [
+      GoRoute(
+        path: '/splash',
+        name: AppRoute.splash.name,
+        builder: (context, state) => SplashScreen(),
+      ),
+      GoRoute(
+        path: '/home',
+        name: AppRoute.home.name,
+        builder: (context, state) => HomeScreen(),
+      ),
+    ],
+  );
+
+  ref.listen(authProvider, (_, __) => router.refresh());
+
+  return router;
+});
+```
+
+```dart title="app.dart"
+class App extends ConsumerWidget {
+  const App({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.read(goRouterProvider);
+
+    return MaterialApp.router(
+      routerConfig: router,
+      theme: AppThemes.lightTheme,
+    );
+  }
+}
+```
+
+**Usage**
+
+```dart
+context.pushNamed(
+  AppRoute.productDetail.name,
+  pathParameters: {'id': id.toString()},
+);
+```
 
 ## Code generation
 
 Example model define with auto generate immutable classes and from/ to json logic.
 
-```dart
+```dart title="models/tag_model.dart"
 part 'tag.freezed.dart';
 part 'tag.g.dart';
 
 Tag tagFromJson(String str) => Tag.fromJson(json.decode(str));
-
 String tagToJson(Tag data) => json.encode(data.toJson());
 
 @freezed // From freezed_annotation
@@ -933,77 +942,173 @@ Inside a Row, always constrain width using:
 - `SizedBox`: Constraints with specific size
 
 
-### Layout
+## Animation
 
-All layout widgets have either of the following:
+### Codebase animation
 
-- A child property if they take a single child—for example, `Center` or `Container`
+**Implicit Animations**: The simplest handles the transition between old and new property values.
 
-- A children property if they take a list of widgets—for example, `Row`, `Column`, `ListView`, or `Stack`.
+- **Pre-packaged Widgets**: Ready-to-use widgets named AnimatedFoo (e.g., `AnimatedContainer`, `AnimatedOpacity`, `AnimatedPositioned`).
 
-```dart
-Column(
-  children: [
-    Container(
-      padding: EdgeInsets.all(20),
-      color: Colors.grey[300],
-      child: Row(
-        children: [
-          Image.asset('assets/img/heart.png', width: 24),
-          Container(margin: EdgeInsets.only(left: 10), child: Text("3")),
-          Expanded(child: SizedBox()),
-          FloatingActionButton(
-            onPressed: onPress,
-            child: Text(
-              "+",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight(700)),
-            ),
-          ),
-        ],
+- **Custom Implicit**: `TweenAnimationBuilder` allows you to implicitly animate properties for which a pre-built widget doesn't exist.
+
+
+```dart title="tween_animation_builder_example.dart"
+TweenAnimationBuilder<double>(
+  tween: Tween<double>(begin: 0, end: 1),
+  duration: const Duration(seconds: 2),
+  curve: Curves.linear,
+  builder: (BuildContext context, double val, Widget? child) {
+    return Opacity(
+      opacity: val,
+      child: Container(
+        width: 200,
+        height: 100,
+        color: Colors.blue,
+        child: child, // The static child passed below
       ),
+    );
+  },
+  child: const Center(
+    child: Text(
+      'TweenAnimationBuilder!',
+      style: TextStyle(color: Colors.white),
     ),
-  ],
+  ),
 ),
 ```
 
-`Container`: Like div in html
-- Decoration: `BoxDecoration`
-  - borderRadius: `BorderRadius`
-  - border: `Border`
-  - color: `Colors`
-  - boxShadow: `[BoxShadow]`
-- padding, margin: `EdgeInsets`
-- BoxConstraints: Constraint by the given size
+```dart title="fade_animation_example.dart"
+class LogoFadeAnimationState extends State<LogoFadeAnimation> {
+  bool _isShow = false;
 
-`ListView`: Scrollable list
+  void _changeOpacity() {
+    setState(() => _isShow = !_isShow);
+  }
 
-`Cart`: Material widget has some built-in props
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        AnimatedOpacity(
+          curve: Curves.easeIn,
+          opacity: _isShow ? 1 : 0,
+          duration: const Duration(seconds: 1),
+          child: FlutterLogo(size: 100),
+        ),
 
-`SizedBox`: Add addition space
+        ElevatedButton(
+          onPressed: _changeOpacity,
+          child: Text(_isShow ? 'hide' : 'show'),
+        ),
+      ],
+    );
+  }
+}
+```
 
-`Expanded`: `flex-grow:1`
+**Explicit Animations**: More control, coordinating multiple animations. These require an `AnimationController`.
 
-`Row`: Display content in a Row
-- Take up as much horizontal space
+- **Transition Widgets**: Built-in widgets named FooTransition (e.g., `FadeTransition`, `ScaleTransition`) that take an explicit Animation object.
 
-`Wrap`: Wrap with in `Row` to flex wrap content
+- **Custom Explicit**: Using `AnimatedBuilder` or subclassing `AnimatedWidget` for complex, custom logic
 
-`Column`: Display content in Column
-- Take up as much vertical space
+```dart title="scale_transition_example.dart"
+class _ScaleTransitionExampleState extends State<ScaleTransitionExample>
+    with TickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    duration: const Duration(milliseconds: 350),
+    vsync: this,
+  );
 
-`Stack`: Container allow item to absolute positions
-- The last element got highest priority
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
-`FittedBox`: Scales and positions its child within itself according to fit.
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        ScaleTransition(
+          scale: _controller,
+          child: const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: FlutterLogo(size: 150.0),
+          ),
+        ),
 
-`Scaffold`: App backgroundColor
+        ElevatedButton(
+          child: Text("Toggle"),
+          onPressed: () {
+            _controller.isCompleted
+                ? _controller.reverse()
+                : _controller.forward();
+          },
+        ),
+      ],
+    );
+  }
+}
+```
 
-`AppBar`: App bar
+use with `Tween`
 
-### User input
+```dart title="scale_transition_example.dart"
+late final Animation<double> _animation = Tween<double>(
+  begin: 0.8,
+  end: 1.0,
+).animate(_controller);
+// ).animate(CurvedAnimation(parent: _controller, curve: Curves.fastOutSlowIn));
 
-`FloatingActionButton`
+...
+ScaleTransition(
+  scale: _animation,
+  child: const Padding(
+    padding: EdgeInsets.all(8.0),
+    child: FlutterLogo(size: 150.0),
+  ),
+),
+```
 
-`TextField`
-- decoration
-  - border, hintText(placeholder)
+```dart title="animated_builder_example.dart"
+class _AnimatedBuilderExampleState extends State<AnimatedBuilderExample>
+    with TickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    duration: const Duration(seconds: 5),
+    vsync: this,
+  )..repeat(reverse: true);
+
+  late final Animation<double> _scale = Tween<double>(
+    begin: 1,
+    end: 0.5,
+  ).animate(_controller);
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      child: Container(
+        width: 200.0,
+        height: 200.0,
+        color: Colors.blue,
+        child: const Center(child: Text('Whee!')),
+      ),
+      builder: (BuildContext context, Widget? child) {
+        return Transform.rotate(
+          angle: _controller.value * 2 * math.pi,
+          child: Transform.scale(scale: _scale.value, child: child),
+        );
+      },
+    );
+  }
+}
+```
