@@ -1,0 +1,446 @@
+---
+title: "Flutter Packages"
+date: "24-4-2026"
+tags: ["Flutter"]
+image: "/images/notes/flutter.png"
+---
+
+## Riverpod
+
+Base flutter project 2026
+
+### ProviderScope
+
+```dart
+// app.dart
+void main() {
+  runApp(
+    const ProviderScope(
+      child: MyApp(),
+    ),
+  );
+}
+```
+
+### Providers
+
+**Provider**
+
+Used for values or objects that don't change
+
+Expose a read-only value.
+
+```dart
+final dioProvider = Provider<Dio>((ref) {
+  return Dio(BaseOptions(baseUrl: 'https://api.example.com'));
+});
+
+// Usage: ref.read(dioProvider).get();
+```
+
+**StateProvider** (Legacy)
+
+Can read/ write value.
+
+```dart
+final themeProvider = StateProvider<ThemeMode>((ref) => ThemeMode.light);
+
+// Usage: ref.read(themeProvider.notifier).state = ThemeMode.dark;
+```
+
+**FutureProvider**
+
+Handles the three states of an asynchronous request: Data, Loading, and Error.
+
+Expose a read-only value.
+
+```dart
+final userProfileProvider = FutureProvider<Map<String, dynamic>>((ref) async {
+  final dio = ref.watch(dioProvider);
+  final response = await dio.get('/user/info');
+  return response.data;
+});
+```
+
+**NotifierProvider**
+
+In Riverpod, the Notifier is specifically designed to be the Controller. It is the single place where:
+
+- State is updated (Loading -> Success/Error).
+- Side effects happen (Calling the API).
+- Errors are handled (The try/catch).
+
+```dart
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tech_review/screens/login/logic/login_state.dart';
+
+
+class AuthRepository {
+  Future<User> signIn(String email, String password) async {
+    // Actual API implementation here
+  }
+}
+
+class LoginNotifier extends Notifier<LoginState> {
+  @override
+  LoginState build() => LoginState(); // Initial state
+
+  Future<void> login(String email, String password) async {
+    // Set loading to true while "calling" API
+    state = state.copyWith(isFetching: true, errorMessage: null);
+    try {
+      // Notifier calls the Repository
+      final user = await ref.read(authRepositoryProvider).signIn(email, password);
+      state = state.copyWith(isLoading: false, isLoggedIn: true);
+    } catch (e) {
+      state = state.copyWith(isLoading: false, errorMessage: e.toString());
+    }
+  }
+
+  void logout() {
+    state = LoginState(); // Reset state
+  }
+}
+
+// Global provider instance
+final loginProvider = NotifierProvider<LoginNotifier, LoginState>(() {
+  return LoginNotifier();
+});
+```
+
+**AsyncNotifierProvider**
+
+Method can be return type of Future
+
+```dart
+class ProductListNotifier extends AsyncNotifier<List<String>> {
+  @override
+  FutureOr<List<String>> build() async {
+    // 1. You can access other providers here using 'ref'
+    // 2. Perform your initial API call
+    return _fetchProducts();
+  }
+
+  // Private method to simulate an API call
+  Future<List<String>> _fetchProducts() async {
+    await Future.delayed(const Duration(seconds: 2)); // Simulate network lag
+    return ['Laptop', 'Smartphone', 'Monitor'];
+  }
+}
+
+
+final productListProvider = AsyncNotifierProvider<ProductListNotifier, List<String>>(() {
+  return ProductListNotifier();
+});
+```
+
+### Ref
+
+The Ref is the "bridge" that allows providers and widgets to interact with other providers.
+
+- WidgetRef: Used inside widgets to read or watch providers.
+- ProviderRef: Used inside a provider to access other providers.
+
+**WidgetRef**
+
+
+**ProviderRef**
+
+### Reading State
+
+There are two main ussage:
+
+- `ref.watch(provider)`: Used inside the build method. It observes the provider and triggers a rebuild of the widget whenever the state changes.
+
+- `ref.read(provider)`: Used inside callbacks (like onPressed). It gets the current value of a provider once without tracking future changes. Never use this inside the build method.
+1
+
+### Modifiers
+
+To change how a provider behaves:
+
+- `.autoDispose`: Automatically destroys the state of a provider when it is no longer being used (e.g., the user leaves the screen). This is excellent for saving memory.
+
+- `.family`: Allows you to pass external parameters to a provider (e.g., fetching a specific user by an ID).
+
+
+| Layer                 | Role              | Logic                                          |
+|-----------------------|-------------------|------------------------------------------------|
+| Widget (View)         | UI / User Input   | Calls notifier.login()                         |
+| Notifier (Controller) | Application Logic | try/catch, updates isLoading, calls Repository |
+| Repository (Data)     | Data Source       | http.post, jsonDecode, throws Errors           |
+
+### Define a state
+
+```dart title="login_state.dart"
+class LoginState {
+  final bool isFetching;
+  final String? errorMessage;
+
+  const LoginState({
+    this.isFetching = false,
+    this.errorMessage,
+  });
+
+  LoginState copyWith({
+    bool? isFetching,
+    String? errorMessage,
+  }) {
+    return LoginState(
+      isFetching: isFetching ?? this.isFetching,
+      errorMessage: errorMessage,
+    );
+  }
+}
+```
+
+### Riverpod annotaion
+
+**Functional Providers**
+
+Using `Provider`, `FutureProvider`, so they are read-Only
+
+
+**Class-Based Providers (Managed State)**
+
+Using `Notifier` or `AsyncNotifier`
+
+Has state and expose public methods to change that state.
+
+
+<table style={{tableLayout: "fixed"}}>
+    <thead>
+        <tr>
+            <th style={{width: '15%'}}>Type</th>
+            <th>**Functional** <br/> (Can't perform side-effects)</th>
+            <th>**Class-Based** <br/> (Can perform side-effects)</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>**Sync**</td>
+            <td>
+                
+                  ```dart 
+                  @riverpod
+                  String example(Ref ref) {
+                    return 'foo'; 
+                  }
+                  ```
+            </td>
+            <td>
+                    ```dart
+                    @riverpod 
+                    class Example extends _$Example { 
+                      @override String build() {
+                        return 'foo'; 
+                      } 
+
+                      //Add methods to mutate the state
+                    }
+                    ```
+            </td>
+        </tr>
+
+        <tr>
+            <td>**Async - Future**</td>
+            <td>
+                
+                    ```dart
+                    @riverpod
+                    Future<String> example(Ref ref) async {
+                      return Future.value('foo');
+                    }                    
+                    ```
+            </td>
+            <td>
+                
+                    ```dart
+                    @riverpod
+                    class Example extends _$Example {
+                      @override
+                      Future<String> build() async {
+                        return Future.value('foo');
+                      }
+
+                      // Add methods to mutate the state
+                    }
+                    ```
+            </td>
+        </tr>
+        <tr>
+            <td>**Async - Stream**</td>
+            <td>
+                
+                    ```dart
+                    @riverpod
+                    Stream<String> example(Ref ref) async* {
+                      yield 'foo';
+                    }
+                    ```
+            </td>
+            <td>
+                
+                    ```dart
+                    @riverpod
+                    class Example extends _$Example {
+                      @override
+                      Stream<String> build() async* {
+                        yield 'foo';
+                      }
+
+                      // Add methods to mutate the state
+                    }
+                    ```
+            </td>
+        </tr>
+        
+    </tbody>
+</table>
+
+### Riverpod Lifecycle
+
+
+
+## Go Router
+
+```dart title="app_go_router.dart"
+enum AppRoute { login, root, home, splash, profile, productDetail }
+
+final goRouterProvider = Provider<GoRouter>((ref) {
+  final router = GoRouter(
+    initialLocation: '/splash',
+    redirect: {}
+    routes: [
+      GoRoute(
+        path: '/splash',
+        name: AppRoute.splash.name,
+        builder: (context, state) => SplashScreen(),
+      ),
+      GoRoute(
+        path: '/home',
+        name: AppRoute.home.name,
+        builder: (context, state) => HomeScreen(),
+      ),
+    ],
+  );
+
+  ref.listen(authProvider, (_, __) => router.refresh());
+
+  return router;
+});
+```
+
+```dart title="app.dart"
+class App extends ConsumerWidget {
+  const App({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.read(goRouterProvider);
+
+    return MaterialApp.router(
+      routerConfig: router,
+      theme: AppThemes.lightTheme,
+    );
+  }
+}
+```
+
+**Usage**
+
+```dart
+context.pushNamed(
+  AppRoute.productDetail.name,
+  pathParameters: {'id': id.toString()},
+);
+```
+
+## Code generation
+
+Example model define with auto generate immutable classes and from/ to json logic.
+
+```dart title="models/tag_model.dart"
+part 'tag.freezed.dart';
+part 'tag.g.dart';
+
+Tag tagFromJson(String str) => Tag.fromJson(json.decode(str));
+String tagToJson(Tag data) => json.encode(data.toJson());
+
+@freezed // From freezed_annotation
+class Tag with _$Tag {
+    const factory Tag({
+        @JsonKey(name: "id")
+        required int id,
+        @JsonKey(name: "category_id") // From json_annotation
+        required int categoryId,
+        @JsonKey(name: "name")
+        required String name,
+    }) = _Tag;
+
+    factory Tag.fromJson(Map<String, dynamic> json) => _$TagFromJson(json);
+}
+```
+
+Break thought:
+
+- `build_runner`: The tool that runs the generation process.
+- `freezed`: Creates immutable classes, copyWith, etc.
+- `json_serializable`: Creates fromJson and toJson logic.
+- `json_annotation`: Correct naming conventions, dart use camelCase, api use snake_case.
+
+
+### Build_runner
+
+|       | Action               | Speed (after start) | Terminate?      |
+|-------|----------------------|---------------------|-----------------|
+| watch | Reacts to file saves | Fast (1-3s)         | No (stays open) |
+| build | Runs once            | Slow (30s+)         | Yes             |
+| clean | Deletes build cache  | Instant             | Yes             |
+
+
+Delete generated files
+
+```dart
+find . -name "*.g.dart" -type f -delete
+```
+
+Add to ~/.bashrc
+
+```bash
+alias brb="dart run build_runner build --delete-conflicting-outputs"
+alias brw="dart run build_runner watch --delete-conflicting-outputs"
+```
+
+
+
+## Localization
+
+<details>
+  <summary>Video</summary>
+  <Video id="WrqH5fF2ZuY" />
+</details>
+
+Add 'l10n.yaml'
+
+```yaml
+arb-dir: lib/l10n
+template-arb-file: app_en.arb
+output-localization-file: app_localizations.dart
+output-class: AppLocalizations
+```
+
+Enable Automatic Generation
+
+```yaml
+flutter:
+  generate: true
+```
+
+Or manual generation
+
+```bash
+flutter gen-l10n
+```
+
+
