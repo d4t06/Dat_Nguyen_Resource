@@ -52,7 +52,7 @@ Command | Starting State | Action
 
 ## Run new docker image
 
-```
+```bash
 docker run -d -p 49161:1521 -p 5000:8080 -v db-vol:/opt/oracle/oradata oracleinanutshell/oracle-xe-11g
 ```
 
@@ -62,8 +62,7 @@ docker run -d -p 49161:1521 -p 5000:8080 -v db-vol:/opt/oracle/oradata oracleina
 
 ## Command
 
-### Image management
-
+<HightlightText>Image management</HightlightText>
 
 `docker image inspect`: See image info
 
@@ -73,7 +72,7 @@ docker run -d -p 49161:1521 -p 5000:8080 -v db-vol:/opt/oracle/oradata oracleina
 
 `docker build -t <name> .`: Create a custom image from a Dockerfile in your current directory.
 
-### Container management 
+<HightlightText>Container management</HightlightText>
 
 `docker ps -a`: List all container
 
@@ -83,7 +82,7 @@ docker run -d -p 49161:1521 -p 5000:8080 -v db-vol:/opt/oracle/oradata oracleina
 
 `docker stop <container_id>`: Stop the container
 
-### Clean up
+<HightlightText>Clean up</HightlightText>
 
 `docker system df`: Amount of storage docker used
 
@@ -165,15 +164,15 @@ Run with .env file
 - Most instructions in a Dockerfile (`RUN`, `COPY`, `ADD`) create a new, immutable layer
 
 
-## Compose file
+## Docker compose
 
-### compose file
+
+<HightlightText>compose file</HightlightText>
 
 Used to configure your Docker application’s services, networks, volumes, and more.
 
-`docker-compose.yaml`
 
-```dockerfile
+```dockerfile title="compose.yml"
 services:
   api:
     build:
@@ -188,8 +187,25 @@ services:
 
 ```
 
-Run compose
+```bash
+# run compose
+docker compose up
+
+# stop and remove container created by docker compose up
+docker compose down
+
+# also delete volume data
+docker compose down -v
+```
+
+<HightlightText>Interact</HightlightText>
 
 ```bash
-docker compose up
+docker exec [OPTIONS] CONTAINER COMMAND [ARG...]
+
+# interact with container named postgres-db-1, perform psql with user hehe
+docker exec -it postgres-db-1 psql -U hehe
 ```
+
+- `-i` (interactive):
+- `-t` (tty): Allocates a pseudo-terminal for a readable layout.

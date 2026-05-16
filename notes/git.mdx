@@ -1,0 +1,44 @@
+---
+title: "Git"
+date: "15-5-2026"
+tags: ["Git"]
+image: "/images/notes/git.png"
+---
+
+## Basic
+
+
+<HighlightText>Main has new commits now</HighlightText>
+
+```bash
+main:
+A --- B --- C --- F --- G
+
+feature:
+             D --- E
+```
+
+Rebase your feature branch onto latest main (cleaner history)
+
+```bash
+A --- B --- C --- F --- G
+
+feature:
+                         \
+                          D' --- E'
+```
+
+```bash
+git stash -u
+git fetch
+git rebase origin/main
+git stash pop
+```
+
+Merge main into your feature branch (simpler, preserves history)
+
+```bash
+A --- B --- C --- F --- G
+             \           \
+              D --- E --- M
+```

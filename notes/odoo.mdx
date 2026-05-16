@@ -1,0 +1,456 @@
+---
+title: "Odoo"
+date: "11-5-2026"
+tags: ["Odoo"]
+image: "/images/notes/odoo.png"
+---
+
+
+## Setup
+
+Odoo 17, Python 3.10.12, Postgres 14, Adminer
+
+Install [docker](https://docs.docker.com/engine/install/ubuntu/)
+
+Run Postgres with docker 
+
+```bash title="postgres/compose.yml"
+# Use postgres/example user/password credentials
+
+services:
+
+  db:
+    image: postgres:14.22-trixie
+    restart: always
+    # set shared memory limit when using docker compose
+    shm_size: 128mb
+    # or set shared memory limit when deploy via swarm stack
+    #volumes:
+    #  - type: tmpfs
+    #    target: /dev/shm
+    #    tmpfs:
+    #      size: 134217728 # 128*2^20 bytes = 128Mb
+    environment:
+      POSTGRES_USER: hehe
+      POSTGRES_PASSWORD: 123123
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+
+volumes:
+  postgres_data:
+```
+
+```bash
+docker compose up
+```
+
+Access database via docker compose
+
+```bash
+docker exec -it myproject-db-1 psql -U odoo -d mydb
+```
+
+`docker exec`: Run a command inside an already running container
+
+`-it`: Open interactive terminal mode
+
+`myproject-db-1`:  Container name
+
+`psql`:  PostgreSQL command line client
+
+`-U odoo`: Connect with PostgreSQL user odoo
+
+`-d mydb`: Connect to database mydb
+
+
+Clone odoo repo
+
+```bash
+git clone repo --depth=1
+```
+
+Folder structure
+
+```
+├── odoo-17
+  ├── custom_addons
+  ├── odoo
+    ├── addons
+    ├── doc
+    ├── odoo
+    ...
+    ├── requirements.txt
+  ├── .venv
+  └── odoo.conf
+```
+
+Install missing tool for linux
+
+```bash
+sudo apt install -y libldap2-dev libsasl2-dev python3-dev build-essential libssl-dev libpq-dev
+```
+
+Fixing cython error, modify requirements.text
+
+```
+gevent==22.10.2
+greenlet==2.0.2
+```
+
+odoo.conf
+
+``` title="odoo.conf"
+[options]
+db_host = localhost
+db_port = 5432
+db_user = hehe
+db_name = hehe 
+db_password = 123123
+addons_path = odoo/addons
+```
+
+Run odoo
+
+```bash
+python3 odoo/odoo-bin -c odoo.conf
+```
+
+Run and init admin user
+
+```bash
+python3 odoo/odoo-bin -c odoo.conf -i base
+```
+
+Custom bash file
+
+```bash title="odoodev"
+#!/bin/bash
+python3 odoo/odoo-bin -c odoo.conf --dev=all "$@"
+```
+
+```bash
+chmod +x odoodev
+./odoodev
+```
+
+### pyrightconfig.json
+
+This for Sublime Text + lsp-basedpyright
+
+There are two pyrightconfig.json in 2 difference project, so we need explicitly it
+
+Odoo namespaced import system
+
+{
+  "venvPath": "/home/datnh/Documents/odoo-17",
+  "venv": ".venv",
+  "useLibraryCodeForTypes": true,
+
+  // Map Execution Environments explicitly
+  "executionEnvironments": [
+    {
+      "root": "/home/datnh/Documents/bach_dang/odoo"
+    },
+    {
+      "root": "/home/datnh/Documents/odoo-17",
+      "extraPaths": [
+        "/home/datnh/Documents/odoo-17",
+        "/home/datnh/Documents/odoo-17/odoo",
+        "/home/datnh/Documents/odoo-17/odoo/addons",
+        "/home/datnh/Documents/bach_dang/odoo/extra_addons"
+      ]
+    }
+  ],
+}
+
+
+## Restore Database
+
+<HighlightText>Couldn't restore database</HighlightText>
+
+`postgresql-common` it does not install the actual psql
+
+```bash
+sudo apt install postgresql-client-<version>
+```
+
+<HighlightText>firebase-admin package</HighlightText>
+
+module 'lib' has no attribute 'X509_V_FLAG_NOTIFY_POLICY
+
+No module named 'cryptography.hazmat.backends.openssl.x509'
+
+```bash
+pip install --force-reinstall "cryptography==38.0.4" "pyOpenSSL==22.1.0" firebase-admin
+````
+
+<HighlightText>psql</HighlightText>
+
+- `\l` List all available databases.
+- `\c db_name` Connect or switch to a different database.
+- `\dt` List tables in the current database.
+- `\d table_name` Describe a table's schema (columns, types, indexes).
+- `\du` List all users and their roles.
+- `\dv` List views.
+- `\q` Quit the psql terminal.
+
+<HighlightText>gitignore locally</HighlightText>
+
+```bash
+nano .git/info/exclude
+```
+
+## Custom module
+
+### Composition of a module
+An Odoo module can contain a number of elements:
+
+
+<HighlightText>Business objects</HighlightText>
+
+A business object (e.g. an invoice) is declared as a Python class. The fields defined in these classes are automatically mapped to database columns thanks to the ORM layer.
+
+
+<HighlightText>Object views</HighlightText>
+
+Define UI display
+
+<HighlightText>Data files</HighlightText>
+
+XML or CSV files declaring the model data:
+
+- views or reports,
+- configuration data (modules parametrization, security rules),
+- demonstration data
+- and more
+
+
+<HighlightText>Web controllers</HighlightText>
+
+Handle requests from web browsers
+
+<HighlightText>Static web data</HighlightText>
+
+Images, CSS or JavaScript files used by the web interface or website
+
+
+### Module structure
+
+Custom restful api
+
+```bash
+custom_rest_api/
+├── __init__.py # import instruction
+├── __manifest__.py # declare
+├── controllers/
+│   ├── __init__.py
+│   └── api.py
+└── models/s
+    └── __init__.py
+└── security/
+    └── ir.model.access.csv
+```
+
+
+```python title="__manifest__.py"
+{
+    "name": "Custom REST API",
+    "version": "1.0",
+    "depends": ["base"],
+    "installable": True,
+    "application": False,
+}
+```
+
+Update odoo.conf
+
+```
+addons_path = odoo/addons, my_addons
+```
+
+**The flag `-i` `-u`**
+
+`-i` Install
+
+Use this  when first create the module, after installed Odoo remembers it in DB.
+
+- What it does: It registers the module in the ir.module.module table
+
+- When to use: Add new module
+
+`-u` Update
+
+Later you change things like edit model
+
+Odoo does NOT automatically reload all module metadata from filesystem every startup.
+
+So it tells Odoo to scan your module's source code and "re-sync" the database with the files.
+
+**Example**
+
+Initial install
+```bash
+-i custom_rest_api
+```
+
+Your model:
+```bash
+class Student(models.Model):
+    _name = 'school.student'
+
+    name = fields.Char()
+```
+DB table created.
+
+Later you add field
+
+```bash
+age = fields.Integer()
+```
+
+If you ONLY restart server:
+
+```bash
+python odoo/odoo-bin -c odoo.conf
+```
+the database schema is NOT updated.
+
+`age` column does not exist.
+
+You get errors.
+
+Then You Use -u
+
+```bash
+-u custom_rest_api
+```
+
+Odoo update the database
+
+
+### Define model
+
+Minimun defintion of model
+
+```python title="models/test_model.py"
+from odoo import models
+
+class TestModel(models.Model):
+    _name = "test.model"
+```
+
+How the corresponding Python file is imported
+
+1. The model is defined in the file `custom_module/models/test_model.py`
+
+2. The file `test_model.py` is imported in `custom_module/models/__init__.py`
+
+2. The folder `models` is imported in `custom_module/__init__.py`
+
+Then run odoo to create new table
+
+```bash
+./odoodev -u custom_module
+```
+
+### Security
+
+```title="security/ir.model.access.csv"
+id,name,model_id/id,group_id/id,perm_read,perm_write,perm_create,perm_unlink
+access_test_model,access_test_model,model_test_model,base.group_user,1,0,0,0
+```
+
+Modify root __manifest__.py
+
+```python
+"data": [
+    "security/ir.model.access.csv",
+],
+```
+
+### UI
+
+<HighlightText>Actions</HighlightText>
+
+Model is define with _name = "test.model", so
+
+```xml title="test_model_view.xml"
+<?xml version="1.0"?>
+<odoo>
+    <record id="test_action" model="ir.actions.act_window">
+        <field name="name">Test action</field>
+        <field name="res_model">test.model</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>
+```
+
+```python
+"data": [
+  ...
+  "views/test_model_views.xml",
+  ],
+```
+
+Then run
+
+```bash
+INFO hehe odoo.modules.loading: loading rest_api/views/test_model_views.xml 
+```
+
+
+<HighlightText>Create menu</HighlightText>
+
+```xml title="estate_menu.xml"
+<?xml version="1.0"?>
+<odoo>
+    <menuitem id="test_menu_root" name="Test">
+        <menuitem id="test_first_level_menu" name="First Level">
+            <menuitem id="test_model_menu_action" action="test_action"/>
+        </menuitem>
+    </menuitem>
+</odoo>
+```
+
+Then add to `__manifest__.py`, default view show as
+
+
+<CustomImage src="/images/notes/odoo/first_menu.png" />
+
+<HighlightText>Custom list view</HighlightText>
+
+
+Remove `editable="bottom"` to use default form
+
+
+```xml title="views/estate_view.xml"
+<record id="estate_property_view_list" model="ir.ui.view">
+   <field name="name">estate.property.list</field>
+    <field name="model">estate.property</field>
+    <field name="arch" type="xml">
+        <list string="Channel" editable="bottom">
+            <field name="name"/>
+            <field name="postcode"/>
+            <field name="date_availability"/>
+            <field name="expected_price"/>
+            <field name="selling_price"/>
+            <field name="bedrooms"/>
+            <field name="living_area"/>
+        </list>
+    </field>
+</record>
+```
+
+<CustomImage src="/images/notes/odoo/list_view.png" />
+
+
+
+
