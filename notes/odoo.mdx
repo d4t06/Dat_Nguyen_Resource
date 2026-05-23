@@ -8,7 +8,7 @@ image: "/images/notes/odoo.png"
 
 ## Setup
 
-Odoo 17, Python 3.10.12, Postgres 14, Adminer
+Odoo 17, Python 3.10.12, Postgres 14, Sublime Text
 
 Install [docker](https://docs.docker.com/engine/install/ubuntu/)
 
@@ -143,33 +143,57 @@ chmod +x odoodev
 
 ### pyrightconfig.json
 
-This for Sublime Text + lsp-basedpyright
-
-There are two pyrightconfig.json in 2 difference project, so we need explicitly it
+Sublime Text + lsp-basedpyright
 
 Odoo namespaced import system
 
-{
-  "venvPath": "/home/datnh/Documents/odoo-17",
-  "venv": ".venv",
-  "useLibraryCodeForTypes": true,
+<HighlightText>Dummy Folder</HighlightText>  
 
-  // Map Execution Environments explicitly
-  "executionEnvironments": [
-    {
-      "root": "/home/datnh/Documents/bach_dang/odoo"
-    },
-    {
-      "root": "/home/datnh/Documents/odoo-17",
-      "extraPaths": [
+Create fake odoo/addons
+
+```bash
+├── some_odoo_project
+  ├── extra_addons
+  ├── odoo
+    ├── addons
+  └── pyrightconfig.json
+```
+
+```bash
+ln -s extra_addons odoo/addons
+```
+
+```json
+{
+    "venvPath": "/home/datnh/Documents/odoo-17",
+    "venv": ".venv",
+    "useLibraryCodeForTypes": true,
+    "include": [
+        "."
+    ],
+    "extraPaths": [
         "/home/datnh/Documents/odoo-17",
-        "/home/datnh/Documents/odoo-17/odoo",
-        "/home/datnh/Documents/odoo-17/odoo/addons",
-        "/home/datnh/Documents/bach_dang/odoo/extra_addons"
-      ]
-    }
-  ],
+        "/home/datnh/Documents/some_odoo_project/odoo"
+    ]
+    "typeCheckingMode": "basic",
+    "reportMissingImports": "warning"
 }
+```
+
+### pycharm format.sh
+
+```bash
+wget https://download.jetbrains.com/python/pycharm-community-2020.1.tar.gz
+```
+
+New build system
+
+```json
+{
+  "shell_cmd": "path_to yapf -i \"$file\"",
+  "selector": "source.python"
+}
+```
 
 
 ## Restore Database
