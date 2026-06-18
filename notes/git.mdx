@@ -8,7 +8,33 @@ image: "/images/notes/git.png"
 ## Basic
 
 
-<HighlightText>Main has new commits now</HighlightText>
+```bash
+# Temporarily ignore changes
+git update-index --assume-unchanged path/to/your/file.ext
+
+# Track changes again later
+git update-index --no-assume-unchanged path/to/your/file.ext
+
+# Log 5 latest commits
+git log --oneline -n 5
+
+
+# Inspecting an old commit (Safe Exploration)
+git checkout <id>
+# To return
+git checkout -
+
+
+# Reset to specific commit (Destructive Rollback)
+git reset --hard <id>
+
+```
+
+
+
+<HighlightText>Merge and Rebase</HighlightText>
+
+Main has new commits now
 
 ```bash
 main:
@@ -18,7 +44,8 @@ feature:
              D --- E
 ```
 
-Rebase your feature branch onto latest main (cleaner history)
+
+<HighlightText>Rebase</HighlightText> your feature branch onto latest main (cleaner history)
 
 ```bash
 A --- B --- C --- F --- G
@@ -35,10 +62,67 @@ git rebase origin/main
 git stash pop
 ```
 
-Merge main into your feature branch (simpler, preserves history)
+<HighlightText>Merge</HighlightText> main into your feature branch (simpler, preserves history)
 
 ```bash
 A --- B --- C --- F --- G
              \           \
               D --- E --- M
+```
+
+
+<HighlightText>git reset --soft HEAD~1</HighlightText>
+
+```bash
+#Before:
+
+A -- B -- C (HEAD)
+
+#After:
+
+A -- B (HEAD)
+```
+
+But all changes from commit C remain staged.
+
+Undoing one or more commits while keeping the changes ready to recommit.
+
+
+
+##  Alias
+
+
+```bash title="~/.gitconfig"
+
+[alias]
+# 1. Short Status
+  st = status -s
+
+  # 2. Smart Commit (Adds all tracked/untracked changes and commits)
+  cm = "!git add -A && git commit -m"
+
+  # 3. Pretty & Visual Log Graph
+  lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+
+  # 4. Quick Branch Switch & Creation
+  co = checkout
+  cb = checkout -b
+
+  # 5. Undo the Last Commit (Keeps files staged)
+  uncommit = reset --soft HEAD~1
+
+  # 6. Clean Sync (Switches to stage, updates, and prunes dead remote branches)
+  sync = "!git checkout stage && git pull origin stage && git fetch --prune"
+
+  # 7. Ultimate "Nuke" Branch (Deletes local and remote copies safely)
+  nuke = "!f() { git branch -d \"$1\" && git push origin --delete \"$1\"; }; f"
+
+  # Bonus: Quick Amend (Adds forgotten changes to the last commit without changing the message)
+  amend = commit --amend --no-edit
+
+  # Bonus: Discard changes in a specific file
+  discard = checkout --
+  nm-stage = !git fetch --all --prune && git branch -r --no-merged origin/stage
+[core]
+  autocrlf = input
 ```
