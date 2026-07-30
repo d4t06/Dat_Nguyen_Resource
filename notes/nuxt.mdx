@@ -1,0 +1,66 @@
+---
+title: "Nuxt"
+date: "20-7-2026"
+tags: ["Nuxt", "Vue"]
+image: "/images/notes/nuxt.jpg"
+---
+
+
+## Basic
+
+**Config global $fetch**
+
+```ts title="plugins/api.ts"
+export default defineNuxtPlugin(() => {
+
+   const config = useRuntimeConfig()
+
+   const api = $fetch.create({
+      baseURL: config.public.API_ENDPOINT,
+      onRequest() {
+      },
+      async onResponseError({ response }) {
+         if (response.status === 401) {
+         }
+      },
+   });
+
+   // Expose to useNuxtApp().$api
+   return {
+      provide: {
+         api,
+      },
+   };
+});
+```
+
+```ts
+const {$api} = useNuxtApp();
+```
+
+**Use static image**
+
+Example for public/icons/check.png
+
+```html
+<img class="w-6" src="/icons/check.png" />
+```
+
+**Use env**
+
+```bash title=".env"
+NUXT_PUBLIC_API_ENDPOINT = http://localhost:4000/api
+```
+
+```js title="nuxt.config.ts"
+export default defineNuxtConfig({
+	// env variables
+  runtimeConfig: {
+    public: {
+    	// This is just definition, override in .env file
+      API_ENDPOINT : "",
+    },
+  },
+});
+```
+
