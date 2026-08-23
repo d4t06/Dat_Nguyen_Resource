@@ -6,12 +6,45 @@ image: "/images/notes/kind/kind.jpg"
 ---
 
 
+## Basic
+
 kind is a tool for running local Kubernetes clusters using Docker container “nodes”.
 
+<HighlightText>Basic manifest</HighlightText>
+
+```yaml title="demo.yaml"
+apiVersion: v1
+kind: Pod
+metadata:
+  name: demo-nginx
+spec:
+  containers:
+    - name: demo-nginx
+      image: nginx:1.14.2
+      ports:
+        - containerPort: 80
+```
 
 <HighlightText>Namespace</HighlightText>
 
 Group resources withing a cluster, there are 4 initial namespage: default, kube-system, kube-node-release, kube-public
 
+
+<HighlightText>Commands</HighlightText>
+
+```
+kubectl get pods
+
+kubectl get ns
+
+kubectl apply -f NAME
+
+kubectl delete pod --all
+
+kubectl get configmaps
+
+kubectl creat cm NAME --from-file=path-to-file
+
+```
 
 

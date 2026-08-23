@@ -1,9 +1,62 @@
 ---
-title: "JavaScript"
+title: "Node.js"
 date: "7-1-2026"
-tags: ["JavaScript"]
-image: "/images/notes/js.png"
+tags: ["Node.js", "JavaScript"]
+image: "/images/notes/nodejs.jpg"
 ---
+
+## Under the hood
+
+<details>
+  <summary>Video</summary>
+  <Video id="8fPdzhLPhr0" time="1920" />
+</details>
+
+## Type coercion
+
+
+<HighlightText>Coercion to String</HighlightText>
+
+```js
+console.log(11 + "1"); // "111" (string)
+```
+
+Whenever the binary + operator is used with a string on either side, JavaScript defaults to `string concatenation`
+
+```js
+console.log([] + []) outputs an empty string ("").
+```
+
+When using the addition operator (+) on objects or arrays, it call `.toString()` method.
+
+<HighlightText>Coercion to Number</HighlightText>
+
+```js
+// Arithmetic operators (-, *, /, %)
+'10' - 2         // 8
+'6' * '2'        // 12
+'10' / null      // Infinity (10 / 0)
+
+// Unary Plus (+):
++'42'            // 42
++true            // 1
++false           // 0
++null            // 0
++undefined       // NaN
+
+// Relational Comparison Operators (>, <, >=, <=):
+'10' > 5         // true 
+'20' <= '3'      // false
+```
+
+
+<HighlightText>Coercion via Loose Equality</HighlightText>
+
+| Comparison          | Coercion Behavior                                          | Example                                                    |
+|---------------------|------------------------------------------------------------|------------------------------------------------------------|
+| String == Number    | Converts String to Number                                  | '42' == 42 -> true                              |
+| Boolean == Anything | Converts Boolean to Number first                           | true == '1' -> 1 == 1 -> true        |
+| Object == Primitive | Converts Object to Primitive via .toString() or .valueOf() | ['a'] == 'a' -> "'a' == 'a'" -> true |
 
 ## let and var in for loop
 
@@ -23,6 +76,32 @@ for (let i = 1; i <= 5; i++) {
 // Output: 1, 2, 3, 4, 5 (printed sequentially after 1, 2, 3, 4, 5 seconds)
 
 ```
+
+## async
+
+```js
+let num = 0;
+async function increament() {
+
+  num += await 2
+  console.log(num)
+}
+
+increament();
+
+num += 1;
+console.log(num);
+// 1 2
+```
+
+`num += await 2`, js read value of `num` beforce pause
+
+## Statement vs Expression
+
+Statement return a value immediately.
+
+Expression does not return a value (returns undefined), cannot be passed as arguments or assigned to variables.
+
 
 
 ## Revealing module pattern
@@ -145,9 +224,19 @@ function f4() {
 
 ## Hoist
 
+```js
+var x = 1;
+const print = () => {
+  console.log(x); //undefined
+  var x = 10;
+};
+
+print()
+```
+
 **var** it's hoisted and assigned **undefined** as default value
 
-**let** is's hoisted but has no default value
+**let** and **const** also hoisted but has no default value
 
 
 ## Random hex color
