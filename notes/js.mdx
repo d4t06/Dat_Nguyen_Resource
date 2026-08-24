@@ -43,6 +43,9 @@ When using the addition operator (+) on objects or arrays, it call `.toString()`
 +false           // 0
 +null            // 0
 +undefined       // NaN
++null            // 0
++[]              // 0
++{}              // NaN
 
 // Relational Comparison Operators (>, <, >=, <=):
 '10' > 5         // true 
@@ -122,18 +125,6 @@ let myModule = (() => {
   
 })()
 // Immediately Invoked Function Expression (IIFE)
-```
-
-## ASI
-
-**Automatic Semicolon Insertion**
-
-```js
-let obj = {a:123}
-[obj].forEach() // Cannot access 'obj' before initialization
-
-let obj = { a: 123 }
-[obj].forEach(a => console.log(a)); // {a: 123}
 ```
 
 ## Single pattern

@@ -1,7 +1,7 @@
 ---
 title: "React"
 date: "12-1-2026"
-tags: ["Angular"]
+tags: ["React"]
 image: "/images/notes/react.png"
 ---
 
@@ -118,3 +118,48 @@ useEffect(() => {
   const params = useParams<{id: string}>();
   routeSlug = "/playlist/:id"
 ```
+
+### New react hooks
+
+Both `useDeferredValue` and `useTransition` achieve the exact same result under the hood: they mark a UI update as a low-priority "Transition" so React can render it in the background without blocking user input.
+
+<HighlightText>useTransition</HighlightText>
+
+You control the action
+
+```js
+SIZE = 1000
+function handleChange(e) {
+  setInput(e.target.value)
+  startTransition(() => {
+    const l = []
+    for (let i = 0; i < SIZE; i++) {
+      l.push(e.target.value)
+    }
+    setList(l)
+  })
+}
+```
+
+`useTransition` runs the action immediately but lets React pause or stop it if a more important update happens, this case `setInput()` has higher priority
+
+<HighlightText>useDeferredValue</HighlightText>
+
+You receive the value
+
+```js
+function Parent() {
+  const [query, setQuery] = useState('');
+  // High priority state update always happens here
+  return <SearchInput query={query} setQuery={setQuery} />;\
+}
+
+function SearchInput({ query, setQuery }) {
+  const deferredQuery = useDeferredValue(query);
+
+  return (
+    <HeavyList query={deferredQuery} />
+  );
+}
+```
+
