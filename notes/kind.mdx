@@ -8,7 +8,58 @@ image: "/images/notes/kind/kind.jpg"
 
 ## Basic
 
+<HighlightText>Docker</HighlightText>
+
+<CustomImage src="/images/notes/kind/meme.jpg"/>
+
+Ensure your conainter works the same way no mater where you create it
+
+<HighlightText>Kind</HighlightText>
+
 kind is a tool for running local Kubernetes clusters using Docker container “nodes”.
+
+<HighlightText>What problem Kubernetes solves</HighlightText>
+
+**Scenario 1: Host machine out or resources!**
+
+k8s adds or removes container automatically based on cpu usage
+
+**Scenario 2: Containers die and are ignored!**
+
+It called self-healing, k8s automatically restart instances that fail or fail their health checks
+
+**Scenario 3: Host machine goes down, taking everything with it!**
+
+k8s automatically replaces and reschedules the workload on a healthy machine
+
+<HighlightText> Kubernetes Cluster Architecture </HighlightText>
+
+<CustomImage width="800" src="/images/notes/kind/kubernetes-cluster-architecture.svg"/>
+
+
+<HighlightText>Node</HighlightText>
+
+A node may be a virtual or physical machine, depending on the cluster. Each node is managed by the **control plane** and contains the services necessary to run **Pods**.
+
+Every cluster needs at least one worker node in order to run Pods.
+
+**Pod**
+
+A wrapper what are being placed around containers, **k8s manages pods not containers**
+
+<HighlightText>Control plane</HighlightText>
+
+Manages and making decision
+
+**kube-api-server:** All actions occour inside cluster done thought API Server that linked to 
+
+kubectl, kubelet (which runs on each node) and etcd
+
+**etcd:** Datastore for k8s
+
+**scheduler:** Schedule a node for a pod to runs inside 
+
+**controller manager:** Continuously monitor the cluster's state, do actions to maintain alignment
 
 <HighlightText>Basic manifest</HighlightText>
 

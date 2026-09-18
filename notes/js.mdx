@@ -215,6 +215,8 @@ function f4() {
 
 ## Hoist
 
+`var` hoist with undefined value
+
 ```js
 var x = 1;
 const print = () => {
@@ -280,3 +282,11 @@ for (var i = 0; i < arr.length; i++) {
 
 arr.forEach((v) => console.log(v)); // 1 5
 ```
+
+## Promise.allSettled
+
+`Promise.all` aborts on the first rejection, whereas `Promise.allSettled` always waits for every operation to finish, regardless of success or failure.
+
+## npm ci
+
+Automated environments (CI/CD, Docker, Production), delete the folder and starts fresh, never update package.json, can throw an error and fail, can't use for install a single package
