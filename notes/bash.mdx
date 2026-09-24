@@ -51,6 +51,13 @@ bcdboot c:\Windows /s <boot letter>: /f UEFI\
 
 ## ETC
 
+**Resize window with hold alt**
+
+```bash
+gsettings set org.gnome.desktop.wm.preferences resize-with-right-button "true"
+gsettings set org.gnome.desktop.wm.preferences mouse-button-modifier '<Alt>'
+```
+
 **Install custom fonts**
 
 place fonts at ~/.local/share/fonts
