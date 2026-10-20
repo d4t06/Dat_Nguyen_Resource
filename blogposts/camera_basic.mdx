@@ -3,9 +3,8 @@ title: "Camera Basic"
 date: "1-5-2026"
 tags:  ["camera"]
 image: "/images/notes/camera_basic/camera_basic.jpg"
+dir: "/images/notes/camera_basic"
 ---
-
-
 
 ## Great videos
 
@@ -15,18 +14,22 @@ image: "/images/notes/camera_basic/camera_basic.jpg"
 </details>
 
 
+
+<ImageFigure
+	text="Nikon D700 + Nikon 50mm Series E"
+ 	src="d700_50mm_series_e.jpg"
+ />
+
 ## Image quality
 
 <div className="flex flex-col md:flex-row justify-center">
 	<ImageFigure
-	  src="/images/notes/camera_basic/image_quality.jpg"
+	  src="image_quality.jpg"
 	  text="PC with sync led"
-	  
 	/>
 	<ImageFigure
-	  src="/images/notes/camera_basic/size_by_paper.jpg"
+	  src="size_by_paper.jpg"
 	  text="For printing"
-
 	/>
 </div>
 
@@ -34,36 +37,30 @@ image: "/images/notes/camera_basic/camera_basic.jpg"
 ## White balance
 
 <ImageFigure
-  src="/images/notes/camera_basic/wb.jpg"
+  src="wb.jpg"
   text="White balance setting"
 />
 
 
 <div className="grid not-prose grid-cols-1 md:grid-cols-2 gap-4 items-start">
 	<ImageFigure
-	  src="/images/notes/camera_basic/wb_1.jpg"
+	  src="wb_1.jpg"
 	  text="This scene photographed using the Auto White Balance"
 	/>
 	<ImageFigure
-	  src="/images/notes/camera_basic/wb_2.jpg"
+	  src="wb_2.jpg"
 	  text="Changing to a Custom White Balance setting results in an image with truer colours"
 	/>
 </div>
 
 
-## Aperture
+## Exposure
 
 <CustomImage
-	className="w-full"
-  src="/images/notes/camera_basic/aperture.avif"
+  src="aperture.avif"
   height={1300}
   width={900}
 />
-
-
-## Shutter speed
-
-## Iso
 
 
 ## Lens
@@ -85,11 +82,54 @@ Take the **Canon RF 100mm F2.8L MACRO IS USM** for example:
 
  <div className="grid not-prose grid-cols-1 md:grid-cols-2 gap-4 items-start">
 	<ImageFigure
-	  src="/images/notes/camera_basic/ovf.avif"
+	  src="ovf.avif"
 	  text="Optical viewfinder in DSLR"
 	/>
 	<ImageFigure
-	  src="/images/notes/camera_basic/evf.avif"
+	  src="evf.avif"
 	  text="Electronic viewfinder"
 	/>
 </div>
+
+
+## Manual focus
+
+
+<CustomImage
+  src="focus_zone.jpg"
+  width="1920"
+  quality="0.7"
+  height="1080"
+/>
+
+As the iamge above, the aperture is set to f22, so the lens has the biggest focus zone
+
+<CustomImage
+  src="focus_zone_1.jpg"
+  width="1920"
+  quality="0.7"
+  height="1080"
+/>
+
+
+## Terms
+
+### The Crop Factor
+
+Because the sensor is smaller, it captures only the central portion
+
+<CustomImage src="crop_factor.jpg" />
+
+For example, a 50mm lens on a 1.5x crop sensor behaves like a 75mm lens
+
+### Full stop
+
+Is a standard unit of measurement in photography that represents the doubling or halving of the amount of light reaching the camera's sensor.
+
+<CustomImage
+  src="full_stop.jpg"
+/>
+
+### Fast lens
+
+A fast lens is a lens with a large maximum aperture (a small f-number, such as f/1.4, f/1.8, or f/2.8) that lets in a high volume of light, allows you to use a faster shutter speed.
