@@ -290,3 +290,11 @@ arr.forEach((v) => console.log(v)); // 1 5
 ## npm ci
 
 Automated environments (CI/CD, Docker, Production), delete the folder and starts fresh, never update package.json, can throw an error and fail, can't use for install a single package
+
+## attach .env
+
+```bash
+node --env-file=path_to_env index.js
+#or
+npx tsx -env-file=path_to_env index.ts
+```

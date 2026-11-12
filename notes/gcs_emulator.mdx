@@ -1,0 +1,60 @@
+---
+title: "GCS Emulators"
+date: "23-10-2026"
+tags: ["GCS Emulator"]
+image: "/images/notes/gcs/gcs.png"
+---
+
+```yaml title="compose.yaml"
+services:
+	bucket:
+    image: fsouza/fake-gcs-server:1.56
+    restart: always
+    ports:
+      - "4443:4443"
+    volumes:
+    	# This mount the the current examples folder as init storage
+      - ./examples:/data
+
+     # This config make local google bucket application's work
+    environment:
+      - FAKE_GCS_SCHEME=http
+      - FAKE_GCS_PORT=4443
+      - FAKE_GCS_EXTERNAL_URL=http://localhost:4443
+
+	pubsub:
+    image: thekevjames/gcloud-pubsub-emulator:latest
+    ports:
+      - "8681:8681"
+    volumes:
+    	# config.json place the same folder as compose.yaml file.
+      - ./config.json:/etc/pubsubc/config.json
+```
+
+```json title="config.json"
+[
+  {
+    "topic": "topic-1-dlq",
+    "project": "hehe",
+    "subscriptions": [
+      {
+        "name": "sub-1-dlq"
+      }
+    ]
+  },
+  {
+    "topic": "topic-1",
+    "project": "hehe",
+    "subscriptions": [
+      {
+        "name": "sub-1",
+        "deadLetterPolicy": {
+          "deadLetterTopic": "projects/hehe/topics/topic-1-dlq",
+          "maxDeliveryAttempts": 5
+        }
+      }
+    ]
+  }
+]
+
+```

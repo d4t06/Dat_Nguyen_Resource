@@ -32,7 +32,7 @@ git reset --hard <id>
 
 
 
-<HighlightText>Merge and Rebase</HighlightText>
+### Merge and Rebase
 
 Main has new commits now
 
@@ -71,7 +71,7 @@ A --- B --- C --- F --- G
 ```
 
 
-<HighlightText>git reset --soft HEAD~1</HighlightText>
+### git reset --soft HEAD~1
 
 ```bash
 #Before:
@@ -88,6 +88,47 @@ But all changes from commit C remain staged.
 Undoing one or more commits while keeping the changes ready to recommit.
 
 
+
+### Commit wrong username
+
+Already push new commit to to new branch
+
+```bash
+git commit --amend --reset-author --no-edit
+# Then check git log for commit author change
+
+git push origin HEAD --force
+# Using HEAD automatically targets your current active branch safely
+```
+
+### Combine multiple commits into 1
+
+```bash
+# N is number of commits
+git rebase -i HEAD~N
+
+
+# Next window, pick the original (init commit, squash all newer commits to it) 
+pick 1111111 init commit (Oldest)
+squash 2222222 add-something commit
+squash 3333333 last commit (Newest)
+
+# Next window, change the new commit message 
+Combined commit
+
+# Push to current branch
+git push origin HEAD --force-with-lease
+```
+
+Or
+
+```bash
+git reset --soft HEAD~N
+
+git commit -m "Your new combined commit message"
+
+git push origin HEAD --force-with-lease
+```
 
 ##  Alias
 
